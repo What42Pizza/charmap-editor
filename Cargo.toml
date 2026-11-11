@@ -1,0 +1,40 @@
+[package]
+name = "charmap-editor"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies.sdl3]
+	version = "0.22.*"
+	features = [ "raw-window-handle", "build-from-source" ]
+	default-features = false
+[dependencies.charmap-renderer]
+	git = "https://github.com/What42Pizza/charmap-renderer"
+	features = [ "image" ]
+	default-features = false
+[dependencies.simple-gpu]
+	git = "https://github.com/What42Pizza/rust-simple-gpu"
+	features = [ "image" ]
+	default-features = false
+[dependencies.wgpu]
+	version = "29.*" # NOTE: wgpu 30.* seems to have some pretty bad input lag problems
+	default-features = false
+	features = [ "std", "dx12", "metal", "gles", "vulkan" ]
+[dependencies.bytemuck]
+	version = "1.*"
+	default-features = false
+[dependencies.image]
+	version = "0.25.*"
+	features = [ "png", "jpeg", "webp", "bmp", "tga" ]
+	default-features = false
+[dependencies.anyhow]
+	version = "1.*"
+	default-features = false
+[dependencies.env_logger]
+	version = "0.11.*"
+	default-features = false
+[dependencies.log]
+	version = "0.4.*"
+	default-features = false
+
+[profile.dev.package."*"]
+opt-level = 3

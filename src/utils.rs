@@ -1,0 +1,82 @@
+use crate::*;
+
+
+
+pub fn place_text_in_box(
+	lines: &[(&str, (u8, u8, u8))],
+	border_colors: (u8, u8, u8),
+	pos: (u16, u16),
+	alignment: (f32, f32),
+	charmap: &mut charmap_renderer::Charmap
+) {
+	
+	let mut longest_len = 0;
+	for (line, _colors) in lines {
+		longest_len = longest_len.max(line.len());
+	}
+	let left_pos = (pos.0 as f32 - (longest_len + 2) as f32 * alignment.0) as u16;
+	let top_pos = (pos.1 as f32 - (lines.len() + 2) as f32 * alignment.1) as u16;
+	
+	for (i, (line, colors)) in lines.iter().enumerate() {
+		place_text(line, (left_pos + 1, top_pos + i as u16 + 1), *colors, charmap);
+	}
+	place_border(left_pos, left_pos + longest_len as u16 + 1, top_pos, top_pos + lines.len() as u16 + 1, border_colors, charmap);
+	
+}
+
+pub fn place_text(
+	text: impl AsRef<str>,
+	mut pos: (u16, u16),
+	colors: (u8, u8, u8),
+	charmap: &mut charmap_renderer::Charmap,
+) {
+	for c in text.as_ref().chars() {
+		charmap.place(c as u8, pos, colors);
+		pos.0 += 1;
+	}
+}
+
+pub fn place_border(
+	left_edge: u16,
+	right_edge: u16,
+	top_edge: u16,
+	bottom_edge: u16,
+	colors: (u8, u8, u8),
+	charmap: &mut charmap_renderer::Charmap,
+) {
+	for x in left_edge + 1..=right_edge - 1 {
+		charmap.place(6, (x, top_edge), colors);
+		charmap.place(6, (x, bottom_edge), colors);
+	}
+	for y in top_edge + 1..=bottom_edge - 1 {
+		charmap.place(7, (left_edge, y), colors);
+		charmap.place(7, (right_edge, y), colors);
+	}
+	charmap.place(4, (left_edge, top_edge), colors);
+	charmap.place(4, (right_edge, top_edge), colors);
+	charmap.place(5, (left_edge, bottom_edge), colors);
+	charmap.place(5, (right_edge, bottom_edge), colors);
+}
+
+
+
+pub fn get_assets_path() -> Result<PathBuf> {
+	let mut output = std::env::current_exe()?;
+	loop {
+		output.push("assets");
+		if output.exists() {
+			return Ok(output);
+		}
+		output.pop();
+		if !output.pop() {
+			bail!("Failed to find assets folder near executable or any parent folders.");
+		}
+	}
+}
+
+pub fn last_modified_time(path: &Path) -> Result<SystemTime> {
+	path
+		.metadata()
+		.and_then(|metadata| metadata.modified())
+		.with_context(|| format!("Failed to get the metadata for the file {}", path.display()))
+}
