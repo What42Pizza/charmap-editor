@@ -114,16 +114,25 @@ fn main() -> Result<()> {
 	
 	// make character map
 	let mut main_charmap = charmap_renderer::create_charmap("Main Charmap", (SCREEN_CHAR_WIDTH, SCREEN_CHAR_HEIGHT), &char_atlas_tex.view, &colors_lut_tex.view, &charmap_render_data, &gpu_instance);
+	let all_chars_1 = (0u8..=63).map(|i| i as char).collect::<String>();
+	let all_chars_2 = (64u8..=127).map(|i| i as char).collect::<String>();
+	let all_chars_3 = (128u8..=191).map(|i| i as char).collect::<String>();
+	let all_chars_4 = (192u8..=255).map(|i| i as char).collect::<String>();
 	place_text_in_box(
 		&[
 			("HELLO, WORLD!", (0, 1, 0)),
 			("The quick brown fox jumped over the lazy dog.", (0, 1, 0)),
 			("", (0, 1, 0)),
 			("this is a test of how much text can actually be put on the screen before it completely fills up", (0, 1, 0)),
-			("1+2+3+4+5+6+7+8+9+0=1234567890", (0, 1, 0)),
+			("1+2-3%4+5+6+7+8+9+0=1234567890", (0, 1, 0)),
 			("this is \"quoted text\" and 'single quotes'", (0, 1, 0)),
+			("100%&25%^30%$43%*78%", (0, 1, 0)),
 			("", (0, 1, 0)),
-			("", (0, 1, 0)),
+			("all chars:", (0, 1, 0)),
+			(&all_chars_1, (0, 1, 0)),
+			(&all_chars_2, (0, 1, 0)),
+			(&all_chars_3, (0, 1, 0)),
+			(&all_chars_4, (0, 1, 0)),
 			("", (0, 1, 0)),
 			("Even more text!", (0, 1, 0)),
 		],
@@ -168,7 +177,7 @@ fn main() -> Result<()> {
 	window.show();
 	while !data.should_quit {
 		
-		handle_events(&mut event_pump, &window, &mut window_surface, &mut data);
+		handle_events(&mut event_pump, window, &mut window_surface, &mut data);
 		
 		render(&mut data, window, &mut window_surface);
 		data.fps_counter.tick();

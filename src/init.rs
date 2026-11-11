@@ -29,8 +29,7 @@ pub fn main_init() -> Result<MainInitData> {
 		.window("Character Screen", SCREEN_WIDTH as u32, SCREEN_HEIGHT as u32)
 		.position_centered()
 		.resizable()
-		//.fullscreen()
-		//.hidden()
+		.maximized()
 		.metal_view()
 		.build()?;
 	let window_size = window.size();
@@ -53,7 +52,7 @@ pub fn load_character_atlas(assets_path: &Path, gpu_instance: &simple_gpu::GpuIn
 	let path = assets_path.join("char_atlas.png");
 	let char_atlas_tex = charmap_renderer::load_character_atlas(&path, &gpu_instance)?;
 	if char_atlas_tex.settings.size != (160, 224) {
-		bail!("Error: the size of the characters atlas (loaded from {}) must be 160x224, but is instead {}x{}", path.display(), 160, 224)
+		bail!("Error: the size of the characters atlas (loaded from {}) must be 160x224, but is instead {}x{}", path.display(), char_atlas_tex.settings.size.0, char_atlas_tex.settings.size.1)
 	}
 	let char_atlas_tex_view = char_atlas_tex.wgpu_texture.create_view(&wgpu::TextureViewDescriptor::default());
 	Ok(SimpleTex {
@@ -73,7 +72,7 @@ pub fn load_colors_lut(assets_path: &Path, gpu_instance: &simple_gpu::GpuInstanc
 		&gpu_instance,
 	)?;
 	if colors_lut_tex.settings.size != (16, 16) {
-		bail!("Error: the size of the colors LUT (loaded from {}) must be 16x16, but is instead {}x{}", path.display(), 16, 16)
+		bail!("Error: the size of the colors LUT (loaded from {}) must be 16x16, but is instead {}x{}", path.display(), colors_lut_tex.settings.size.0, colors_lut_tex.settings.size.1)
 	}
 	let colors_lut_tex_view = colors_lut_tex.wgpu_texture.create_view(&wgpu::TextureViewDescriptor::default());
 	Ok(SimpleTex {

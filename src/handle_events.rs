@@ -1,9 +1,9 @@
 use crate::*;
-use sdl3::EventPump;
+use sdl3::{EventPump, video::FullscreenType};
 
 
 
-pub fn handle_events(event_pump: &mut EventPump, window: &Window, window_surface: &mut simple_gpu::WindowSurface, data: &mut ProgramData) {
+pub fn handle_events(event_pump: &mut EventPump, window: &mut Window, window_surface: &mut simple_gpu::WindowSurface, data: &mut ProgramData) {
 	for event in event_pump.poll_iter() {
 		match event {
 			
@@ -25,13 +25,16 @@ pub fn handle_events(event_pump: &mut EventPump, window: &Window, window_surface
 			| Event::Window {
 				win_event: WindowEvent::CloseRequested,
 				..
-			}
-			| Event::KeyDown {
-				keycode: Some(Keycode::Escape),
-				..
-			} => {
-				println!("closing"); // note: this can get both a quit event and a close requested event in the same frame
+			} if !data.should_quit => {
+				println!("closing");
 				data.should_quit = true;
+			}
+			
+			Event::KeyDown { keycode: Some(keycode), .. } => {
+				let result = handle_key_down(keycode, data, window);
+				if let Err(err) = result {
+					eprintln!("Error while handling event {event:?}: \n{err}");
+				}
 			}
 			
 			e => {
@@ -39,4 +42,21 @@ pub fn handle_events(event_pump: &mut EventPump, window: &Window, window_surface
 			}
 		}
 	}
+}
+
+
+
+pub fn handle_key_down(keycode: Keycode, data: &mut ProgramData, window: &mut Window) -> Result<()>{
+	
+	if keycode == Keycode::F11 {
+		let fullscreen = window.fullscreen_state() == FullscreenType::True;
+		window.set_fullscreen(!fullscreen)?;
+	}
+	
+	if keycode == Keycode::Escape {
+		println!("closing");
+		data.should_quit = true;
+	}
+	
+	Ok(())
 }
