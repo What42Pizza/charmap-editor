@@ -26,14 +26,16 @@ pub fn place_text_in_box(
 
 pub fn place_text(
 	text: impl AsRef<str>,
-	mut pos: (u16, u16),
+	pos: (u16, u16),
 	colors: (u8, u8, u8),
 	charmap: &mut charmap_renderer::Charmap,
-) {
+) -> u16 {
+	let mut i = 0;
 	for c in text.as_ref().chars() {
-		charmap.place(c as u8, pos, colors);
-		pos.0 += 1;
+		charmap.place(c as u8, (pos.0 + i, pos.1), colors);
+		i += 1;
 	}
+	i
 }
 
 pub fn place_border(

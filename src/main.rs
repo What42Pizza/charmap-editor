@@ -20,7 +20,7 @@ pub use sdl3::{
 	keyboard::{KeyboardState, Keycode},
 	video::Window,
 };
-pub use std::{path::{Path, PathBuf}, time::{Instant, SystemTime}};
+pub use std::{path::{Path, PathBuf}, result::Result::{self as StdResult, Ok as StdOk, Err as StdErr}, time::{Instant, SystemTime}};
 
 
 
@@ -45,7 +45,6 @@ pub struct ProgramData {
 	pub should_quit: bool,
 	pub fps_counter: simple_gpu::FpsCounter,
 	pub assets_path: PathBuf,
-	pub state: ProgramState,
 	
 	// rendering data
 	pub gpu_instance: simple_gpu::GpuInstance,
@@ -61,6 +60,7 @@ pub struct ProgramData {
 	pub char_atlas_tex: SimpleTex,
 	pub colors_lut_tex: SimpleTex,
 	pub ui_charmap: charmap_renderer::Charmap,
+	pub editing_charmap: Option<(charmap_renderer::Charmap, PathBuf)>,
 	
 }
 
@@ -71,19 +71,24 @@ pub struct SimpleTex {
 	pub last_modified_time: SystemTime,
 }
 
-pub enum ProgramState {
-	FileSelect {
-		current_path: String,
-	},
-	Editing {
-		editing_charmap: charmap_renderer::Charmap,
-		editing_charmap_path: PathBuf,
-	},
+
+
+fn main() {
+	let result = main_result();
+	if let StdErr(err) = result {
+		println!("Fatal error while running program:\n{err:?}");
+		rfd::MessageDialog::new()
+			.set_title("Program Crash")
+			.set_description(format!("An unrecoverable error has occurred: {err}"))
+			.set_level(rfd::MessageLevel::Error)
+			.set_buttons(rfd::MessageButtons::Ok)
+			.show();
+	}
 }
 
 
 
-fn main() -> Result<()> {
+fn main_result() -> Result<()> {
 	
 	// main init
 	let MainInitData {
@@ -127,7 +132,7 @@ fn main() -> Result<()> {
 	let final_pipeline = simple_gpu::create_2d_pipeline("Final Pipeline", &[], &final_shaders, &[window_surface.wgpu_format], &mut gpu_instance);
 	let final_uniforms = simple_gpu::create_uniforms_buffer(&gpu_instance);
 	
-	// make character map
+	// make character maps
 	let ui_charmap = charmap_renderer::create_charmap("Ui Charmap", (SCREEN_CHAR_WIDTH, SCREEN_CHAR_HEIGHT), &char_atlas_tex.view, &colors_lut_tex.view, &charmap_render_data, &gpu_instance);
 	
 	// assemble program's data
@@ -136,9 +141,6 @@ fn main() -> Result<()> {
 		should_quit: false,
 		fps_counter: simple_gpu::FpsCounter::new(),
 		assets_path,
-		state: ProgramState::FileSelect {
-			current_path: String::new(),
-		},
 		
 		gpu_instance,
 		charmap_render_data,
@@ -148,7 +150,7 @@ fn main() -> Result<()> {
 		final_uniforms,
 		final_shaders,
 		rendering_settings: RenderingSettings {
-			fish_eye_amount: 0.85,
+			fish_eye_amount: 0.75,
 			scaling_factor: 1.0,
 			background_color: (20, 20, 30),
 			scanline_amount: 0.5,
@@ -158,6 +160,7 @@ fn main() -> Result<()> {
 		char_atlas_tex,
 		colors_lut_tex,
 		ui_charmap,
+		editing_charmap: None,
 		
 	};
 	
@@ -197,7 +200,7 @@ pub fn check_and_update_textures(data: &mut ProgramData) -> Result<()> {
 	
 	if needs_rebind {
 		data.ui_charmap.update_textures(&data.char_atlas_tex.view, &data.colors_lut_tex.view, &mut data.charmap_render_data, &data.gpu_instance);
-		if let ProgramState::Editing { editing_charmap, editing_charmap_path: _ } = &mut data.state {
+		if let Some((editing_charmap, _editing_charmap_path)) = &mut data.editing_charmap {
 			editing_charmap.update_textures(&data.char_atlas_tex.view, &data.colors_lut_tex.view, &mut data.charmap_render_data, &data.gpu_instance);
 		}
 	}

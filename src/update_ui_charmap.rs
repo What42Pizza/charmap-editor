@@ -2,35 +2,64 @@ use crate::*;
 
 
 
+const RIGHT_PANEL_SIZE: u16 = 16;
+
+
+
 pub fn update_ui_charmap(data: &mut ProgramData) {
 	data.ui_charmap.buffer.fill(0);
-	match &data.state {
-		ProgramState::FileSelect { current_path } => {
-			update_ui_charmap_file_select(&mut data.ui_charmap, &current_path);
-		}
-		ProgramState::Editing { editing_charmap: _, editing_charmap_path: _ } => {
-			update_ui_charmap_editing(&mut data.ui_charmap);
-		}
-	}
+	place_border(0, SCREEN_CHAR_WIDTH - 1, 0, SCREEN_CHAR_HEIGHT - 1, (1, 6, 0), &mut data.ui_charmap);
+	
+	place_basic_edges(data);
+	
+	let mut x = 1;
+	x += place_button_text("Open: ctrl+O", (x, 1), (2, 5, 0), 1, &mut data.ui_charmap);
+	x += place_button_text("New: ctrl+N", (x, 1), (2, 5, 0), 1, &mut data.ui_charmap);
+	     place_button_text("Save: ctrl+S", (x, 1), (2, 5, 0), 1, &mut data.ui_charmap);
+	
 	data.ui_charmap.update_gpu(&data.gpu_instance);
 }
 
 
 
-pub fn update_ui_charmap_editing(ui_charmap: &mut charmap_renderer::Charmap) {
+pub fn place_basic_edges(data: &mut ProgramData) {
 	
+	// editing charmap border
+	place_border(2, SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 7, 6, SCREEN_CHAR_HEIGHT - 3, (1, 5, 0), &mut data.ui_charmap);
 	
+	// right panel border
+	for y in 1 .. SCREEN_CHAR_HEIGHT - 1 {
+		data.ui_charmap.place(7, (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 4, y), (1, 5, 0));
+	}
 	
-	place_border(0, SCREEN_CHAR_WIDTH - 1, 0, SCREEN_CHAR_HEIGHT - 1, (0, 2, 0), ui_charmap);
+	// top panel border
+	for x in 1 .. SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 4 {
+		data.ui_charmap.place(6, (x, 4), (1, 5, 0));
+	}
+	
 }
 
-
-
-pub fn update_ui_charmap_file_select(ui_charmap: &mut charmap_renderer::Charmap, current_path: &str) {
-	
-	place_text_in_box(&[("Charmap Editor", (0, 1, 0))], (0, 1, 0), (SCREEN_CHAR_WIDTH / 2, SCREEN_CHAR_HEIGHT / 2 - 10), (0.5, 0.5), ui_charmap);
-	
-	place_text_in_box(&[("File to open:", (0, 1, 0)), (current_path, (0, 1, 0))], (0, 4, 0), (SCREEN_CHAR_WIDTH / 2, SCREEN_CHAR_HEIGHT / 2), (0.5, 0.5), ui_charmap);
-	
-	place_border(0, SCREEN_CHAR_WIDTH - 1, 0, SCREEN_CHAR_HEIGHT - 1, (0, 2, 0), ui_charmap);
+pub fn place_button_text(text: &str, mut pos: (u16, u16), colors: (u8, u8, u8), background_color: u8, charmap: &mut charmap_renderer::Charmap) -> u16 {
+	let text_len = place_text(text, (pos.0 + 1, pos.1 + 1), colors, charmap);
+	let colors = (background_color, colors.0, 0);
+	charmap.place(12, pos, colors);
+	for _ in 0..text_len {
+		pos.0 += 1;
+		charmap.place(11, pos, colors);
+	}
+	pos.0 += 1;
+	charmap.place(13, pos, colors);
+	pos.1 += 1;
+	charmap.place(8, pos, colors);
+	pos.1 += 1;
+	charmap.place(15, pos, colors);
+	for _ in 0..text_len {
+		pos.0 -= 1;
+		charmap.place(10, pos, colors);
+	}
+	pos.0 -= 1;
+	charmap.place(14, pos, colors);
+	pos.1 -= 1;
+	charmap.place(9, pos, colors);
+	text_len + 2
 }

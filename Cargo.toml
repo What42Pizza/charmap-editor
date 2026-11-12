@@ -26,6 +26,9 @@ edition = "2024"
 	version = "0.25.*"
 	features = [ "png", "jpeg", "webp", "bmp", "tga" ]
 	default-features = false
+[dependencies.rfd]
+	version = "0.18.0"
+	#default-features = false # the default features here already seem good
 [dependencies.anyhow]
 	version = "1.*"
 	default-features = false
