@@ -4,6 +4,7 @@
 		"charmap",
 		"gles",
 		"glsl",
+		"multiview",
 		"scanline",
 		"Unorm",
 		"Vsync",

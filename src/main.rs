@@ -8,6 +8,9 @@ pub const SCREEN_CHAR_HEIGHT: u16 = 70;
 pub const SCREEN_WIDTH: u16 = SCREEN_CHAR_WIDTH * charmap_renderer::CHAR_WIDTH as u16;
 pub const SCREEN_HEIGHT: u16 = SCREEN_CHAR_HEIGHT * charmap_renderer::CHAR_HEIGHT as u16;
 
+//pub const BOTTOM_ROW_CHAR: u16 = SCREEN_CHAR_HEIGHT - 1;
+//pub const BOTTOM_ROW_EDGE_CHAR: u16 = BOTTOM_ROW_CHAR - 1;
+
 
 
 pub use anyhow::*;
@@ -26,6 +29,8 @@ pub use init::*;
 
 pub mod handle_events;
 pub use handle_events::*;
+pub mod update_ui_charmap;
+pub use update_ui_charmap::*;
 pub mod render;
 pub use render::*;
 
@@ -40,11 +45,11 @@ pub struct ProgramData {
 	pub should_quit: bool,
 	pub fps_counter: simple_gpu::FpsCounter,
 	pub assets_path: PathBuf,
+	pub state: ProgramState,
 	
 	// rendering data
 	pub gpu_instance: simple_gpu::GpuInstance,
-	pub char_atlas_tex: SimpleTex,
-	pub colors_lut_tex: SimpleTex,
+	pub charmap_render_data: charmap_renderer::CharmapRenderData,
 	pub intermediate_tex: simple_gpu::Texture,
 	pub final_pipeline: wgpu::RenderPipeline,
 	pub final_pipeline_output_format: wgpu::TextureFormat,
@@ -53,9 +58,9 @@ pub struct ProgramData {
 	pub rendering_settings: RenderingSettings,
 	
 	// charmap data
-	pub main_charmap: charmap_renderer::Charmap,
-	pub charmap_render_data: charmap_renderer::CharmapRenderData,
-	
+	pub char_atlas_tex: SimpleTex,
+	pub colors_lut_tex: SimpleTex,
+	pub ui_charmap: charmap_renderer::Charmap,
 	
 }
 
@@ -64,6 +69,16 @@ pub struct SimpleTex {
 	pub view: wgpu::TextureView,
 	pub path: PathBuf,
 	pub last_modified_time: SystemTime,
+}
+
+pub enum ProgramState {
+	FileSelect {
+		current_path: String,
+	},
+	Editing {
+		editing_charmap: charmap_renderer::Charmap,
+		editing_charmap_path: PathBuf,
+	},
 }
 
 
@@ -113,36 +128,7 @@ fn main() -> Result<()> {
 	let final_uniforms = simple_gpu::create_uniforms_buffer(&gpu_instance);
 	
 	// make character map
-	let mut main_charmap = charmap_renderer::create_charmap("Main Charmap", (SCREEN_CHAR_WIDTH, SCREEN_CHAR_HEIGHT), &char_atlas_tex.view, &colors_lut_tex.view, &charmap_render_data, &gpu_instance);
-	let all_chars_1 = (0u8..=63).map(|i| i as char).collect::<String>();
-	let all_chars_2 = (64u8..=127).map(|i| i as char).collect::<String>();
-	let all_chars_3 = (128u8..=191).map(|i| i as char).collect::<String>();
-	let all_chars_4 = (192u8..=255).map(|i| i as char).collect::<String>();
-	place_text_in_box(
-		&[
-			("HELLO, WORLD!", (0, 1, 0)),
-			("The quick brown fox jumped over the lazy dog.", (0, 1, 0)),
-			("", (0, 1, 0)),
-			("this is a test of how much text can actually be put on the screen before it completely fills up", (0, 1, 0)),
-			("1+2-3%4+5+6+7+8+9+0=1234567890", (0, 1, 0)),
-			("this is \"quoted text\" and 'single quotes'", (0, 1, 0)),
-			("100%&25%^30%$43%*78%", (0, 1, 0)),
-			("", (0, 1, 0)),
-			("all chars:", (0, 1, 0)),
-			(&all_chars_1, (0, 1, 0)),
-			(&all_chars_2, (0, 1, 0)),
-			(&all_chars_3, (0, 1, 0)),
-			(&all_chars_4, (0, 1, 0)),
-			("", (0, 1, 0)),
-			("Even more text!", (0, 1, 0)),
-		],
-		(0, 4, 0),
-		(main_charmap.size.0 / 2, main_charmap.size.1 / 2),
-		(0.5, 0.5),
-		&mut main_charmap,
-	);
-	place_border(0, SCREEN_CHAR_WIDTH-1, 0, SCREEN_CHAR_HEIGHT-1, (0, 2, 0), &mut main_charmap);
-	main_charmap.update_gpu(&gpu_instance);
+	let ui_charmap = charmap_renderer::create_charmap("Ui Charmap", (SCREEN_CHAR_WIDTH, SCREEN_CHAR_HEIGHT), &char_atlas_tex.view, &colors_lut_tex.view, &charmap_render_data, &gpu_instance);
 	
 	// assemble program's data
 	let mut data = ProgramData {
@@ -150,10 +136,12 @@ fn main() -> Result<()> {
 		should_quit: false,
 		fps_counter: simple_gpu::FpsCounter::new(),
 		assets_path,
+		state: ProgramState::FileSelect {
+			current_path: String::new(),
+		},
 		
 		gpu_instance,
-		char_atlas_tex,
-		colors_lut_tex,
+		charmap_render_data,
 		intermediate_tex,
 		final_pipeline,
 		final_pipeline_output_format: window_surface.wgpu_format,
@@ -167,8 +155,9 @@ fn main() -> Result<()> {
 			scanline_scale: 4.0,
 		},
 		
-		charmap_render_data,
-		main_charmap,
+		char_atlas_tex,
+		colors_lut_tex,
+		ui_charmap,
 		
 	};
 	
@@ -178,6 +167,7 @@ fn main() -> Result<()> {
 	while !data.should_quit {
 		
 		handle_events(&mut event_pump, window, &mut window_surface, &mut data);
+		update_ui_charmap(&mut data);
 		
 		render(&mut data, window, &mut window_surface);
 		data.fps_counter.tick();
@@ -206,7 +196,10 @@ pub fn check_and_update_textures(data: &mut ProgramData) -> Result<()> {
 	}
 	
 	if needs_rebind {
-		data.main_charmap.update_textures(&data.char_atlas_tex.view, &data.colors_lut_tex.view, &mut data.charmap_render_data, &data.gpu_instance);
+		data.ui_charmap.update_textures(&data.char_atlas_tex.view, &data.colors_lut_tex.view, &mut data.charmap_render_data, &data.gpu_instance);
+		if let ProgramState::Editing { editing_charmap, editing_charmap_path: _ } = &mut data.state {
+			editing_charmap.update_textures(&data.char_atlas_tex.view, &data.colors_lut_tex.view, &mut data.charmap_render_data, &data.gpu_instance);
+		}
 	}
 	
 	Ok(())

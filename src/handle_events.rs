@@ -37,6 +37,12 @@ pub fn handle_events(event_pump: &mut EventPump, window: &mut Window, window_sur
 				}
 			}
 			
+			Event::TextInput { text, .. } => {
+				if let ProgramState::FileSelect { current_path } = &mut data.state {
+					*current_path += &text;
+				}
+			}
+			
 			e => {
 				info!("Unknown event: {e:?}");
 			}
@@ -56,6 +62,17 @@ pub fn handle_key_down(keycode: Keycode, data: &mut ProgramData, window: &mut Wi
 	if keycode == Keycode::Escape {
 		println!("closing");
 		data.should_quit = true;
+	}
+	
+	match &mut data.state {
+		ProgramState::FileSelect { current_path } => {
+			if keycode == Keycode::Backspace {
+				current_path.pop();
+			}
+		}
+		ProgramState::Editing { editing_charmap: _, editing_charmap_path: _ } => {
+			
+		}
 	}
 	
 	Ok(())

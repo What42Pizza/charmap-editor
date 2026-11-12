@@ -113,7 +113,7 @@ pub fn render(data: &mut ProgramData, window: &Window, window_surface: &mut simp
 		multiview_mask: None,
 	});
 	charmap_renderer::render(
-		&[&data.main_charmap],
+		&[&data.ui_charmap],
 		&mut charmap_render_pass,
 		&mut data.charmap_render_data,
 	);

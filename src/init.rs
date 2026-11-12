@@ -25,13 +25,15 @@ pub fn main_init() -> Result<MainInitData> {
 	// sdl
 	let sdl = sdl3::init()?;
 	let video = sdl.video()?;
-	let window = video
+	let mut window = video
 		.window("Character Screen", SCREEN_WIDTH as u32, SCREEN_HEIGHT as u32)
 		.position_centered()
 		.resizable()
-		.maximized()
+		//.maximized()
 		.metal_view()
 		.build()?;
+	window.maximize();
+	window.subsystem().text_input().start(&window); // allows Event::TextInput to work
 	let window_size = window.size();
 	let event_pump = sdl.event_pump()?;
 	
