@@ -21,8 +21,8 @@ pub use init::*;
 
 pub mod handle_events;
 pub use handle_events::*;
-pub mod update_ui_charmap;
-pub use update_ui_charmap::*;
+pub mod draw_ui_charmap;
+pub use draw_ui_charmap::*;
 pub mod render;
 pub use render::*;
 

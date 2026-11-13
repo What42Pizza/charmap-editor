@@ -62,6 +62,28 @@ pub fn place_border(
 	charmap.place(CHAR_CORNER_BOTTOM, (right_edge, bottom_edge), colors);
 }
 
+pub fn place_siding(
+	left_edge: u16,
+	right_edge: u16,
+	top_edge: u16,
+	bottom_edge: u16,
+	colors: (u8, u8, u8),
+	charmap: &mut charmap_renderer::Charmap,
+) {
+	for x in left_edge + 1..=right_edge - 1 {
+		charmap.place(CHAR_SIDING_TOP, (x, top_edge), colors);
+		charmap.place(CHAR_SIDING_BOTTOM, (x, bottom_edge), colors);
+	}
+	for y in top_edge + 1..=bottom_edge - 1 {
+		charmap.place(CHAR_SIDING_LEFT, (left_edge, y), colors);
+		charmap.place(CHAR_SIDING_RIGHT, (right_edge, y), colors);
+	}
+	charmap.place(CHAR_SIDING_TOP_LEFT, (left_edge, top_edge), colors);
+	charmap.place(CHAR_SIDING_TOP_RIGHT, (right_edge, top_edge), colors);
+	charmap.place(CHAR_SIDING_BOTTOM_LEFT, (left_edge, bottom_edge), colors);
+	charmap.place(CHAR_SIDING_BOTTOM_RIGHT, (right_edge, bottom_edge), colors);
+}
+
 
 
 pub fn display_message(message: impl Into<String>, current_message: &mut CurrentMessage) {

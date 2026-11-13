@@ -6,6 +6,7 @@ use sdl3::{EventPump, keyboard, video::FullscreenType};
 pub fn handle_events(event_pump: &mut EventPump, window: &mut Window, window_surface: &mut simple_gpu::WindowSurface, data: &mut ProgramData) {
 	
 	let keyboard = event_pump.keyboard_state();
+	let shift_down = keyboard.is_scancode_pressed(keyboard::Scancode::LShift) || keyboard.is_scancode_pressed(keyboard::Scancode::RShift);
 	let ctrl_down = keyboard.is_scancode_pressed(keyboard::Scancode::LCtrl) || keyboard.is_scancode_pressed(keyboard::Scancode::RCtrl);
 	data.show_help = keyboard.is_scancode_pressed(keyboard::Scancode::H);
 	
@@ -28,8 +29,8 @@ pub fn handle_events(event_pump: &mut EventPump, window: &mut Window, window_sur
 			
 			Event::Quit { .. } => {
 				println!("{event:?}");
-				println!("Forced closing");
-				data.should_quit = true;
+				println!("Ctrl+C pressed, forcing close");
+				quit(data);
 			}
 			Event::Window {
 				win_event: WindowEvent::CloseRequested,
@@ -40,7 +41,7 @@ pub fn handle_events(event_pump: &mut EventPump, window: &mut Window, window_sur
 			}
 			
 			Event::KeyDown { keycode: Some(keycode), .. } => {
-				let result = handle_key_down(keycode, ctrl_down, data, window);
+				let result = handle_key_down(keycode, ctrl_down, shift_down, data, window);
 				if let Err(err) = result {
 					eprintln!("Error while handling event {event:?}: \n{err}");
 				}
@@ -57,14 +58,18 @@ pub fn handle_events(event_pump: &mut EventPump, window: &mut Window, window_sur
 
 
 
-pub fn handle_key_down(keycode: Keycode, ctrl_down: bool, data: &mut ProgramData, window: &mut Window) -> Result<()>{
+pub fn handle_key_down(keycode: Keycode, ctrl_down: bool, shift_down: bool, data: &mut ProgramData, window: &mut Window) -> Result<()>{
 	
 	if keycode == Keycode::F11 {
 		let fullscreen = window.fullscreen_state() == FullscreenType::True;
 		window.set_fullscreen(!fullscreen).context("Failed to toggle fullscreen")?;
 	}
 	if ctrl_down && keycode == Keycode::Q {
-		try_quit(data);
+		if shift_down {
+			quit(data);
+		} else {
+			try_quit(data);
+		}
 	}
 	
 	if ctrl_down && keycode == Keycode::S {
@@ -87,7 +92,7 @@ pub fn handle_key_down(keycode: Keycode, ctrl_down: bool, data: &mut ProgramData
 		CurrentPrioritizedAction::CreatingNewCharmap => {
 			let new_charmap_data = data.new_charmap_data.as_mut().expect("current_prioritized_action() cannot be CreatingNewCharmap when data.new_charmap_data is empty");
 			if keycode == Keycode::Return && new_charmap_data.selection == NewCharmapSelection::CreateButton {
-				finish_new_charmap(data);
+				create_new_editing_charmap(data);
 			} else {
 				if keycode == Keycode::Up {
 					new_charmap_data.selection = new_charmap_data.selection.next_up();
@@ -133,7 +138,7 @@ pub fn handle_text_input(new_text: String, data: &mut ProgramData) {
 
 
 
-pub fn finish_new_charmap(data: &mut ProgramData) {
+pub fn create_new_editing_charmap(data: &mut ProgramData) {
 	let new_charmap_data = data.new_charmap_data.as_mut().expect("finish_new_charmap() cannot be called when data.new_charmap_data is empty");
 	
 	let width = match new_charmap_data.width_input.parse::<u16>() {
@@ -178,6 +183,10 @@ pub fn try_quit(data: &mut ProgramData) {
 		display_warning("Cannot quit, charmap is not saved", &mut data.current_message);
 		return;
 	}
+	quit(data);
+}
+
+pub fn quit(data: &mut ProgramData) {
 	println!("Closing");
 	data.should_quit = true;
 }

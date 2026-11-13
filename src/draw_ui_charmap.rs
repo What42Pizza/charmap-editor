@@ -11,6 +11,7 @@ pub fn update_ui_charmap(data: &mut ProgramData) {
 	place_border(0, SCREEN_CHAR_WIDTH - 1, 0, SCREEN_CHAR_HEIGHT - 1, (COLOR_BLACK, COLOR_BRIGHT_RED, 0), &mut data.ui_charmap);
 	
 	place_basic_edges(data);
+	place_colors_and_chars(data);
 	
 	let prioritized_action = current_prioritized_action(data);
 	
@@ -38,6 +39,9 @@ pub fn place_basic_edges(data: &mut ProgramData) {
 	
 	// editing charmap border
 	place_border(2, SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 7, 6, SCREEN_CHAR_HEIGHT - 3, (COLOR_BLACK, COLOR_WHITE, 0), &mut data.ui_charmap);
+	if data.edit_charmap_data.is_none() {
+		place_text(" No charmap is loaded ", (4, 6), (COLOR_BLACK, COLOR_WHITE, 0), &mut data.ui_charmap);
+	}
 	
 	// right panel border
 	for y in 1 .. SCREEN_CHAR_HEIGHT - 1 {
@@ -52,15 +56,44 @@ pub fn place_basic_edges(data: &mut ProgramData) {
 	
 }
 
+pub fn place_colors_and_chars(data: &mut ProgramData) {
+	
+	place_text("Colors:", (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 2, 2), (COLOR_BLACK, COLOR_WHITE, 0), &mut data.ui_charmap);
+	place_siding(SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 3, SCREEN_CHAR_WIDTH - 2, 3, 20, (COLOR_BLACK, COLOR_DARK_GREY, COLOR_LIGHT_GREY), &mut data.ui_charmap);
+	let mut color = 0;
+	for y in 4..20 {
+		for x in SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 2 .. SCREEN_CHAR_WIDTH - 2 {
+			data.ui_charmap.place(1, (x, y), (color, color, 0));
+			color = color.wrapping_add(1);
+		}
+	}
+	
+	place_text("Characters:", (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 2, 21), (COLOR_BLACK, COLOR_WHITE, 0), &mut data.ui_charmap);
+	place_siding(SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 3, SCREEN_CHAR_WIDTH - 2, 22, 39, (COLOR_BLACK, COLOR_DARK_GREY, COLOR_LIGHT_GREY), &mut data.ui_charmap);
+	let mut c = 0;
+	for y in 23..39 {
+		for x in SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 2 .. SCREEN_CHAR_WIDTH - 2 {
+			data.ui_charmap.place(c, (x, y), (COLOR_BLACK, COLOR_WHITE, COLOR_BRIGHT_YELLOW));
+			c = c.wrapping_add(1);
+		}
+	}
+	
+}
+
+
+
 pub fn show_help_screen(data: &mut ProgramData) {
 	
 	let mut pos = (3, 7);
-	pos.0 += place_button_text("Open: ctrl+O"         , pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
-	pos.0 += place_button_text("New: ctrl+N"          , pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
-	pos.0 += place_button_text("Save: ctrl+S"         , pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
-	         place_button_text("Close charmap: ctrl+w", pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
+	pos.0 += place_button_text("Open: ctrl+O", pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
+	pos.0 += place_button_text("New: ctrl+N" , pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
+	         place_button_text("Save: ctrl+S", pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
 	
 	let mut pos = (3, 10);
+	pos.0 += place_button_text("Close charmap: ctrl+w", pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
+	         place_button_text("Close charmap without saving: shift+ctrl+w", pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
+	
+	let mut pos = (3, 13);
 	pos.0 += place_button_text("quit program: ctrl+q"  , pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
 	         place_button_text("toggle fullscreen: f11", pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
 	
@@ -82,27 +115,9 @@ pub fn show_new_charmap_screen(data: &mut ProgramData) {
 
 
 
-pub fn place_button_text(text: impl AsRef<str>, mut pos: (u16, u16), colors: (u8, u8, u8), background_color: u8, charmap: &mut charmap_renderer::Charmap) -> u16 {
+pub fn place_button_text(text: impl AsRef<str>, pos: (u16, u16), colors: (u8, u8, u8), background_color: u8, charmap: &mut charmap_renderer::Charmap) -> u16 {
 	let text_len = place_text(text, (pos.0 + 1, pos.1 + 1), colors, charmap);
-	let colors = (background_color, colors.0, 0);
-	charmap.place(CHAR_SIDING_TOP_LEFT, pos, colors);
-	for _ in 0..text_len {
-		pos.0 += 1;
-		charmap.place(CHAR_SIDING_TOP, pos, colors);
-	}
-	pos.0 += 1;
-	charmap.place(CHAR_SIDING_TOP_RIGHT, pos, colors);
-	pos.1 += 1;
-	charmap.place(CHAR_SIDING_RIGHT, pos, colors);
-	pos.1 += 1;
-	charmap.place(CHAR_SIDING_BOTTOM_RIGHT, pos, colors);
-	for _ in 0..text_len {
-		pos.0 -= 1;
-		charmap.place(CHAR_SIDING_BOTTOM, pos, colors);
-	}
-	pos.0 -= 1;
-	charmap.place(CHAR_SIDING_BOTTOM_LEFT, pos, colors);
-	pos.1 -= 1;
-	charmap.place(CHAR_SIDING_LEFT, pos, colors);
+	let colors = (background_color, colors.0, colors.0);
+	place_siding(pos.0, pos.0 + text_len + 1, pos.1, pos.1 + 2, colors, charmap);
 	text_len + 2
 }
