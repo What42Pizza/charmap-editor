@@ -53,7 +53,7 @@ pub fn main_init() -> Result<MainInitData> {
 
 pub fn load_character_atlas(assets_path: &Path, gpu_instance: &simple_gpu::GpuInstance) -> Result<SimpleTex> {
 	let path = assets_path.join("char_atlas.png");
-	let char_atlas_tex = charmap_renderer::load_character_atlas(&path, &gpu_instance)?;
+	let char_atlas_tex = charmap_renderer::load_character_atlas(&path, gpu_instance)?;
 	if char_atlas_tex.settings.size != (160, 224) {
 		bail!("Error: the size of the characters atlas (loaded from {}) must be 160x224, but is instead {}x{}", path.display(), char_atlas_tex.settings.size.0, char_atlas_tex.settings.size.1)
 	}
@@ -72,7 +72,7 @@ pub fn load_colors_lut(assets_path: &Path, gpu_instance: &simple_gpu::GpuInstanc
 		&path,
 		wgpu::FilterMode::Nearest,
 		1,
-		&gpu_instance,
+		gpu_instance,
 	)?;
 	if colors_lut_tex.settings.size != (16, 16) {
 		bail!("Error: the size of the colors LUT (loaded from {}) must be 16x16, but is instead {}x{}", path.display(), colors_lut_tex.settings.size.0, colors_lut_tex.settings.size.1)

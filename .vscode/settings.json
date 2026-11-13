@@ -5,6 +5,7 @@
 		"gles",
 		"glsl",
 		"multiview",
+		"scancode",
 		"scanline",
 		"Unorm",
 		"Vsync",

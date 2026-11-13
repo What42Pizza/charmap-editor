@@ -82,7 +82,7 @@ pub fn render(data: &mut ProgramData, window: &Window, window_surface: &mut simp
 		surface_tex,
 		surface_tex_view,
 		mut command_encoder,
-	) = match simple_gpu::start_frame("render frame", &window_surface, &data.gpu_instance) {
+	) = match simple_gpu::start_frame("render frame", window_surface, &data.gpu_instance) {
 		simple_gpu::StartFrameResult::Some(tex, view, commands) => (tex, view, commands),
 		simple_gpu::StartFrameResult::None => return,
 		simple_gpu::StartFrameResult::Error => {

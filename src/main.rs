@@ -3,8 +3,8 @@
 
 
 
-pub const SCREEN_CHAR_WIDTH: u16 = 150;
-pub const SCREEN_CHAR_HEIGHT: u16 = 70;
+pub const SCREEN_CHAR_WIDTH: u16 = 128;
+pub const SCREEN_CHAR_HEIGHT: u16 = 64;
 pub const SCREEN_WIDTH: u16 = SCREEN_CHAR_WIDTH * charmap_renderer::CHAR_WIDTH as u16;
 pub const SCREEN_HEIGHT: u16 = SCREEN_CHAR_HEIGHT * charmap_renderer::CHAR_HEIGHT as u16;
 
@@ -62,8 +62,11 @@ pub struct ProgramData {
 	pub char_atlas_tex: SimpleTex,
 	pub colors_lut_tex: SimpleTex,
 	pub ui_charmap: charmap_renderer::Charmap,
-	pub editing_charmap: Option<charmap_renderer::Charmap>,
-	pub editing_charmap_path: Option<PathBuf>,
+	pub edit_charmap_data: Option<EditCharmapData>,
+	
+	// misc
+	pub show_help: bool,
+	pub current_message: CurrentMessage,
 	
 }
 
@@ -72,6 +75,20 @@ pub struct SimpleTex {
 	pub view: wgpu::TextureView,
 	pub path: PathBuf,
 	pub last_modified_time: SystemTime,
+}
+
+pub struct EditCharmapData {
+	pub data: Vec<u8>,
+	pub size: (u16, u16),
+	pub save_path: Option<PathBuf>,
+	pub is_saved: bool,
+	pub cursor_pos: (u16, u16),
+}
+
+pub struct CurrentMessage {
+	pub message: String,
+	pub disappear_time: Instant,
+	pub colors: (u8, u8),
 }
 
 
@@ -167,8 +184,14 @@ fn main_result() -> Result<()> {
 		char_atlas_tex,
 		colors_lut_tex,
 		ui_charmap,
-		editing_charmap: None,
-		editing_charmap_path: None,
+		edit_charmap_data: None,
+		
+		show_help: false,
+		current_message: CurrentMessage {
+			message: String::new(),
+			disappear_time: Instant::now(),
+			colors: (1, 5),
+		},
 		
 	};
 	
@@ -210,10 +233,7 @@ pub fn check_and_update_textures(data: &mut ProgramData) -> Result<()> {
 	}
 	
 	if needs_rebind {
-		data.ui_charmap.update_textures(&data.char_atlas_tex.view, &data.colors_lut_tex.view, &mut data.charmap_render_data, &data.gpu_instance);
-		if let Some(editing_charmap) = &mut data.editing_charmap {
-			editing_charmap.update_textures(&data.char_atlas_tex.view, &data.colors_lut_tex.view, &mut data.charmap_render_data, &data.gpu_instance);
-		}
+		data.ui_charmap.update_textures(&data.char_atlas_tex.view, &data.colors_lut_tex.view, &data.charmap_render_data, &data.gpu_instance);
 	}
 	
 	Ok(())

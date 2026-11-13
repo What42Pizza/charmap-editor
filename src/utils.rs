@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::*;
 
 
@@ -58,6 +60,26 @@ pub fn place_border(
 	charmap.place(CHAR_CORNER_TOP, (right_edge, top_edge), colors);
 	charmap.place(CHAR_CORNER_BOTTOM, (left_edge, bottom_edge), colors);
 	charmap.place(CHAR_CORNER_BOTTOM, (right_edge, bottom_edge), colors);
+}
+
+
+
+pub fn display_message(message: impl Into<String>, current_message: &mut CurrentMessage) {
+	current_message.message = message.into();
+	current_message.disappear_time = Instant::now() + Duration::from_secs(3);
+	current_message.colors = (2, 5);
+}
+
+pub fn display_warning(message: impl Into<String>, current_message: &mut CurrentMessage) {
+	current_message.message = message.into();
+	current_message.disappear_time = Instant::now() + Duration::from_secs(3);
+	current_message.colors = (38, 1);
+}
+
+pub fn display_error(message: impl Into<String>, current_message: &mut CurrentMessage) {
+	current_message.message = message.into();
+	current_message.disappear_time = Instant::now() + Duration::from_secs(3);
+	current_message.colors = (22, 5);
 }
 
 
