@@ -73,7 +73,7 @@ pub fn display_message(message: impl Into<String>, current_message: &mut Current
 pub fn display_warning(message: impl Into<String>, current_message: &mut CurrentMessage) {
 	current_message.message = message.into();
 	current_message.disappear_time = Instant::now() + Duration::from_secs(3);
-	current_message.colors = (COLOR_WARNING_YELLOW, COLOR_WHITE);
+	current_message.colors = (COLOR_WARNING_YELLOW, COLOR_BLACK);
 }
 
 pub fn display_error(message: impl Into<String>, current_message: &mut CurrentMessage) {
