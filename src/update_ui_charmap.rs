@@ -29,37 +29,38 @@ pub fn place_basic_edges(data: &mut ProgramData) {
 	
 	// right panel border
 	for y in 1 .. SCREEN_CHAR_HEIGHT - 1 {
-		data.ui_charmap.place(7, (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 4, y), (1, 5, 0));
+		data.ui_charmap.place(CHAR_EDGE_VERTICAL, (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 4, y), (1, 5, 0));
 	}
 	
 	// top panel border
 	for x in 1 .. SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 4 {
-		data.ui_charmap.place(6, (x, 4), (1, 5, 0));
+		data.ui_charmap.place(CHAR_EDGE_HORIZONTAL, (x, 4), (1, 5, 0));
 	}
+	data.ui_charmap.place(CHAR_EDGE_RIGHT_INTERSECT, (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 4, 4),(1, 5, 0));
 	
 }
 
 pub fn place_button_text(text: &str, mut pos: (u16, u16), colors: (u8, u8, u8), background_color: u8, charmap: &mut charmap_renderer::Charmap) -> u16 {
 	let text_len = place_text(text, (pos.0 + 1, pos.1 + 1), colors, charmap);
 	let colors = (background_color, colors.0, 0);
-	charmap.place(12, pos, colors);
+	charmap.place(CHAR_SIDING_TOP_LEFT, pos, colors);
 	for _ in 0..text_len {
 		pos.0 += 1;
-		charmap.place(11, pos, colors);
+		charmap.place(CHAR_SIDING_TOP, pos, colors);
 	}
 	pos.0 += 1;
-	charmap.place(13, pos, colors);
+	charmap.place(CHAR_SIDING_TOP_RIGHT, pos, colors);
 	pos.1 += 1;
-	charmap.place(8, pos, colors);
+	charmap.place(CHAR_SIDING_RIGHT, pos, colors);
 	pos.1 += 1;
-	charmap.place(15, pos, colors);
+	charmap.place(CHAR_SIDING_BOTTOM_RIGHT, pos, colors);
 	for _ in 0..text_len {
 		pos.0 -= 1;
-		charmap.place(10, pos, colors);
+		charmap.place(CHAR_SIDING_BOTTOM, pos, colors);
 	}
 	pos.0 -= 1;
-	charmap.place(14, pos, colors);
+	charmap.place(CHAR_SIDING_BOTTOM_LEFT, pos, colors);
 	pos.1 -= 1;
-	charmap.place(9, pos, colors);
+	charmap.place(CHAR_SIDING_LEFT, pos, colors);
 	text_len + 2
 }

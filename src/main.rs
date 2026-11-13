@@ -34,6 +34,8 @@ pub use update_ui_charmap::*;
 pub mod render;
 pub use render::*;
 
+pub mod charmap_char_indices;
+pub use charmap_char_indices::*;
 pub mod utils;
 pub use utils::*;
 

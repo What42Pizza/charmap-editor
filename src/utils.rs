@@ -47,17 +47,17 @@ pub fn place_border(
 	charmap: &mut charmap_renderer::Charmap,
 ) {
 	for x in left_edge + 1..=right_edge - 1 {
-		charmap.place(6, (x, top_edge), colors);
-		charmap.place(6, (x, bottom_edge), colors);
+		charmap.place(CHAR_EDGE_HORIZONTAL, (x, top_edge), colors);
+		charmap.place(CHAR_EDGE_HORIZONTAL, (x, bottom_edge), colors);
 	}
 	for y in top_edge + 1..=bottom_edge - 1 {
-		charmap.place(7, (left_edge, y), colors);
-		charmap.place(7, (right_edge, y), colors);
+		charmap.place(CHAR_EDGE_VERTICAL, (left_edge, y), colors);
+		charmap.place(CHAR_EDGE_VERTICAL, (right_edge, y), colors);
 	}
-	charmap.place(4, (left_edge, top_edge), colors);
-	charmap.place(4, (right_edge, top_edge), colors);
-	charmap.place(5, (left_edge, bottom_edge), colors);
-	charmap.place(5, (right_edge, bottom_edge), colors);
+	charmap.place(CHAR_CORNER_TOP, (left_edge, top_edge), colors);
+	charmap.place(CHAR_CORNER_TOP, (right_edge, top_edge), colors);
+	charmap.place(CHAR_CORNER_BOTTOM, (left_edge, bottom_edge), colors);
+	charmap.place(CHAR_CORNER_BOTTOM, (right_edge, bottom_edge), colors);
 }
 
 
