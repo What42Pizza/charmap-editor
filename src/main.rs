@@ -1,15 +1,7 @@
-//#![allow(unused)]
-//#![warn(unused_must_use)]
-
-
-
 pub const SCREEN_CHAR_WIDTH: u16 = 128;
 pub const SCREEN_CHAR_HEIGHT: u16 = 64;
 pub const SCREEN_WIDTH: u16 = SCREEN_CHAR_WIDTH * charmap_renderer::CHAR_WIDTH as u16;
 pub const SCREEN_HEIGHT: u16 = SCREEN_CHAR_HEIGHT * charmap_renderer::CHAR_HEIGHT as u16;
-
-//pub const BOTTOM_ROW_CHAR: u16 = SCREEN_CHAR_HEIGHT - 1;
-//pub const BOTTOM_ROW_EDGE_CHAR: u16 = BOTTOM_ROW_CHAR - 1;
 
 
 
@@ -34,8 +26,8 @@ pub use update_ui_charmap::*;
 pub mod render;
 pub use render::*;
 
-pub mod charmap_char_indices;
-pub use charmap_char_indices::*;
+pub mod indices;
+pub use indices::*;
 pub mod utils;
 pub use utils::*;
 
@@ -67,6 +59,7 @@ pub struct ProgramData {
 	// misc
 	pub show_help: bool,
 	pub current_message: CurrentMessage,
+	pub new_charmap_data: Option<NewCharmapData>,
 	
 }
 
@@ -89,6 +82,11 @@ pub struct CurrentMessage {
 	pub message: String,
 	pub disappear_time: Instant,
 	pub colors: (u8, u8),
+}
+
+pub struct NewCharmapData {
+	pub width_input: String,
+	pub height_input: String,
 }
 
 
@@ -192,6 +190,7 @@ fn main_result() -> Result<()> {
 			disappear_time: Instant::now(),
 			colors: (1, 5),
 		},
+		new_charmap_data: None,
 		
 	};
 	

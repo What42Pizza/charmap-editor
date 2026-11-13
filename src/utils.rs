@@ -67,19 +67,19 @@ pub fn place_border(
 pub fn display_message(message: impl Into<String>, current_message: &mut CurrentMessage) {
 	current_message.message = message.into();
 	current_message.disappear_time = Instant::now() + Duration::from_secs(3);
-	current_message.colors = (2, 5);
+	current_message.colors = (COLOR_DARK_GREY, COLOR_WHITE);
 }
 
 pub fn display_warning(message: impl Into<String>, current_message: &mut CurrentMessage) {
 	current_message.message = message.into();
 	current_message.disappear_time = Instant::now() + Duration::from_secs(3);
-	current_message.colors = (38, 1);
+	current_message.colors = (COLOR_WARNING_YELLOW, COLOR_WHITE);
 }
 
 pub fn display_error(message: impl Into<String>, current_message: &mut CurrentMessage) {
 	current_message.message = message.into();
 	current_message.disappear_time = Instant::now() + Duration::from_secs(3);
-	current_message.colors = (22, 5);
+	current_message.colors = (COLOR_ERROR_RED, COLOR_WHITE);
 }
 
 
