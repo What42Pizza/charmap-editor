@@ -87,6 +87,57 @@ pub struct CurrentMessage {
 pub struct NewCharmapData {
 	pub width_input: String,
 	pub height_input: String,
+	pub selection: NewCharmapSelection,
+}
+
+#[derive(Copy, Clone, PartialEq)]
+pub enum NewCharmapSelection {
+	WidthInput,
+	HeightInput,
+	CreateButton,
+}
+
+impl Default for NewCharmapData {
+	fn default() -> Self {
+		Self {
+			width_input: SCREEN_CHAR_WIDTH.to_string(),
+			height_input: SCREEN_CHAR_HEIGHT.to_string(),
+			selection: NewCharmapSelection::WidthInput,
+		}
+	}
+}
+
+impl NewCharmapSelection {
+	pub fn next_down(self) -> Self {
+		match self {
+			Self::WidthInput => Self::HeightInput,
+			Self::HeightInput => Self::CreateButton,
+			Self::CreateButton => Self::CreateButton,
+		}
+	}
+	pub fn next_up(self) -> Self {
+		match self {
+			Self::WidthInput => Self::WidthInput,
+			Self::HeightInput => Self::WidthInput,
+			Self::CreateButton => Self::HeightInput,
+		}
+	}
+}
+
+
+
+#[derive(PartialEq)]
+pub enum CurrentPrioritizedAction {
+	// ordered from most to least important
+	CreatingNewCharmap,
+	ShowingHelpScreen,
+	Nothing,
+}
+
+pub fn current_prioritized_action(data: &ProgramData) -> CurrentPrioritizedAction {
+	if data.new_charmap_data.is_some() { return CurrentPrioritizedAction::CreatingNewCharmap; }
+	if data.show_help { return CurrentPrioritizedAction::ShowingHelpScreen; }
+	CurrentPrioritizedAction::Nothing
 }
 
 

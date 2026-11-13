@@ -26,11 +26,16 @@ pub fn handle_events(event_pump: &mut EventPump, window: &mut Window, window_sur
 				);
 			}
 			
-			Event::Quit { .. }
-			| Event::Window {
+			Event::Quit { .. } => {
+				println!("{event:?}");
+				println!("Forced closing");
+				data.should_quit = true;
+			}
+			Event::Window {
 				win_event: WindowEvent::CloseRequested,
 				..
 			} if !data.should_quit => {
+				println!("{event:?}");
 				try_quit(data);
 			}
 			
@@ -41,9 +46,7 @@ pub fn handle_events(event_pump: &mut EventPump, window: &mut Window, window_sur
 				}
 			}
 			
-			Event::TextInput { text: _, .. } => {
-				
-			}
+			Event::TextInput { text, .. } => handle_text_input(text, data),
 			
 			e => {
 				info!("Unknown event: {e:?}");
@@ -60,7 +63,6 @@ pub fn handle_key_down(keycode: Keycode, ctrl_down: bool, data: &mut ProgramData
 		let fullscreen = window.fullscreen_state() == FullscreenType::True;
 		window.set_fullscreen(!fullscreen).context("Failed to toggle fullscreen")?;
 	}
-	
 	if ctrl_down && keycode == Keycode::Q {
 		try_quit(data);
 	}
@@ -72,8 +74,101 @@ pub fn handle_key_down(keycode: Keycode, ctrl_down: bool, data: &mut ProgramData
 			display_error("Cannot save, no charmap is loaded", &mut data.current_message);
 		}
 	}
+	if ctrl_down && keycode == Keycode::N {
+		if let Some(edit_charmap_data) = &data.edit_charmap_data && !edit_charmap_data.is_saved {
+			display_warning("Cannot create a new charmap, the current charmap is not saved", &mut data.current_message);
+		} else {
+			data.new_charmap_data = Some(NewCharmapData::default());
+		}
+	}
+	
+	match current_prioritized_action(data) {
+		
+		CurrentPrioritizedAction::CreatingNewCharmap => {
+			let new_charmap_data = data.new_charmap_data.as_mut().expect("current_prioritized_action() cannot be CreatingNewCharmap when data.new_charmap_data is empty");
+			if keycode == Keycode::Return && new_charmap_data.selection == NewCharmapSelection::CreateButton {
+				finish_new_charmap(data);
+			} else {
+				if keycode == Keycode::Up {
+					new_charmap_data.selection = new_charmap_data.selection.next_up();
+				}
+				if keycode == Keycode::Down || keycode == Keycode::Return {
+					new_charmap_data.selection = new_charmap_data.selection.next_down();
+				}
+				if keycode == Keycode::Backspace {
+					match new_charmap_data.selection {
+						NewCharmapSelection::WidthInput => { new_charmap_data.width_input.pop(); }
+						NewCharmapSelection::HeightInput => { new_charmap_data.height_input.pop(); }
+						NewCharmapSelection::CreateButton => {}
+					}
+				}
+			}
+		}
+		
+		CurrentPrioritizedAction::ShowingHelpScreen => {}
+		CurrentPrioritizedAction::Nothing => {}
+	}
 	
 	Ok(())
+}
+
+
+
+pub fn handle_text_input(new_text: String, data: &mut ProgramData) {
+	match current_prioritized_action(data) {
+		
+		CurrentPrioritizedAction::CreatingNewCharmap => {
+			let new_charmap_data = data.new_charmap_data.as_mut().expect("current_prioritized_action() cannot be CreatingNewCharmap when data.new_charmap_data is empty");
+			match new_charmap_data.selection {
+				NewCharmapSelection::WidthInput => new_charmap_data.width_input += &new_text,
+				NewCharmapSelection::HeightInput => new_charmap_data.height_input += &new_text,
+				NewCharmapSelection::CreateButton => {}
+			}
+		}
+		
+		CurrentPrioritizedAction::ShowingHelpScreen => {}
+		CurrentPrioritizedAction::Nothing => {}
+	}
+}
+
+
+
+pub fn finish_new_charmap(data: &mut ProgramData) {
+	let new_charmap_data = data.new_charmap_data.as_mut().expect("finish_new_charmap() cannot be called when data.new_charmap_data is empty");
+	
+	let width = match new_charmap_data.width_input.parse::<u16>() {
+		StdOk(v) => v,
+		StdErr(err) => {
+			display_error(format!("Invalid width input: {err}"), &mut data.current_message);
+			return;
+		}
+	};
+	let height = match new_charmap_data.height_input.parse::<u16>() {
+		StdOk(v) => v,
+		StdErr(err) => {
+			display_error(format!("Invalid height input: {err}"), &mut data.current_message);
+			return;
+		}
+	};
+	
+	if width == 0 {
+		display_error(format!("Invalid width input: cannot be 0"), &mut data.current_message);
+		return;
+	}
+	if height == 0 {
+		display_error(format!("Invalid height input: cannot be 0"), &mut data.current_message);
+		return;
+	}
+	
+	data.edit_charmap_data = Some(EditCharmapData {
+		data: vec![0; width as usize * height as usize * 4],
+		size: (width, height),
+		save_path: None,
+		is_saved: false,
+		cursor_pos: (0, 0),
+	});
+	data.new_charmap_data = None;
+	
 }
 
 
@@ -83,6 +178,6 @@ pub fn try_quit(data: &mut ProgramData) {
 		display_warning("Cannot quit, charmap is not saved", &mut data.current_message);
 		return;
 	}
-	println!("closing");
+	println!("Closing");
 	data.should_quit = true;
 }

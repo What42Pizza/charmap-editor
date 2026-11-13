@@ -35,6 +35,7 @@ pub fn main_init() -> Result<MainInitData> {
 		.context("Failed to create a window with Sdl3")?;
 	window.maximize();
 	window.subsystem().text_input().start(&window); // allows Event::TextInput to work
+	sdl3::hint::set(sdl3::hint::names::QUIT_ON_LAST_WINDOW_CLOSE, "0"); // makes closing the window only trigger `win_event: CloseRequested`
 	let window_size = window.size();
 	let event_pump = sdl.event_pump().context("Failed to create an event pump with Sdl3")?;
 	

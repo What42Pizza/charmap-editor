@@ -12,9 +12,17 @@ pub fn update_ui_charmap(data: &mut ProgramData) {
 	
 	place_basic_edges(data);
 	
+	let prioritized_action = current_prioritized_action(data);
+	
 	place_button_text("Press H to show controls", (1, 1), (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
-	if data.show_help {
-		show_help(data);
+	match prioritized_action {
+		CurrentPrioritizedAction::CreatingNewCharmap => {
+			show_new_charmap_screen(data);
+		}
+		CurrentPrioritizedAction::ShowingHelpScreen => {
+			show_help_screen(data);
+		}
+		CurrentPrioritizedAction::Nothing => {}
 	}
 	
 	if Instant::now() < data.current_message.disappear_time {
@@ -44,23 +52,37 @@ pub fn place_basic_edges(data: &mut ProgramData) {
 	
 }
 
-pub fn show_help(data: &mut ProgramData) {
+pub fn show_help_screen(data: &mut ProgramData) {
 	
-	let mut x = 3;
-	x += place_button_text("Open: ctrl+O"         , (x, 7), (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
-	x += place_button_text("New: ctrl+N"          , (x, 7), (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
-	x += place_button_text("Save: ctrl+S"         , (x, 7), (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
-	     place_button_text("Close charmap: ctrl+w", (x, 7), (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
+	let mut pos = (3, 7);
+	pos.0 += place_button_text("Open: ctrl+O"         , pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
+	pos.0 += place_button_text("New: ctrl+N"          , pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
+	pos.0 += place_button_text("Save: ctrl+S"         , pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
+	         place_button_text("Close charmap: ctrl+w", pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
 	
-	let mut x = 3;
-	x += place_button_text("quit program: ctrl+q"  , (x, 10), (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
-	     place_button_text("toggle fullscreen: f11", (x, 10), (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
+	let mut pos = (3, 10);
+	pos.0 += place_button_text("quit program: ctrl+q"  , pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
+	         place_button_text("toggle fullscreen: f11", pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
+	
+}
+
+pub fn show_new_charmap_screen(data: &mut ProgramData) {
+	let Some(new_charmap_data) = &data.new_charmap_data else { panic!("Cannot call show_new_charmap_screen() when new_charmap_data is empty"); };
+	
+	let color = if new_charmap_data.selection == NewCharmapSelection::WidthInput { (COLOR_WHITE, COLOR_BLACK, 0) } else { (COLOR_DARK_GREY, COLOR_WHITE, 0) };
+	place_button_text(format!("Width: {}", new_charmap_data.width_input) , (3,  7), color, COLOR_BLACK, &mut data.ui_charmap);
+	
+	let color = if new_charmap_data.selection == NewCharmapSelection::HeightInput { (COLOR_WHITE, COLOR_BLACK, 0) } else { (COLOR_DARK_GREY, COLOR_WHITE, 0) };
+	place_button_text(format!("Height: {}", new_charmap_data.height_input), (3, 10), color, COLOR_BLACK, &mut data.ui_charmap);
+	
+	let color = if new_charmap_data.selection == NewCharmapSelection::CreateButton { (COLOR_WHITE, COLOR_BLACK, 0) } else { (COLOR_DARK_GREY, COLOR_WHITE, 0) };
+	place_button_text(format!("Create Charmap"), (3, 13), color, COLOR_BLACK, &mut data.ui_charmap);
 	
 }
 
 
 
-pub fn place_button_text(text: &str, mut pos: (u16, u16), colors: (u8, u8, u8), background_color: u8, charmap: &mut charmap_renderer::Charmap) -> u16 {
+pub fn place_button_text(text: impl AsRef<str>, mut pos: (u16, u16), colors: (u8, u8, u8), background_color: u8, charmap: &mut charmap_renderer::Charmap) -> u16 {
 	let text_len = place_text(text, (pos.0 + 1, pos.1 + 1), colors, charmap);
 	let colors = (background_color, colors.0, 0);
 	charmap.place(CHAR_SIDING_TOP_LEFT, pos, colors);
