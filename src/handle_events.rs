@@ -71,6 +71,13 @@ pub fn handle_key_down(keycode: Keycode, ctrl_down: bool, shift_down: bool, data
 			try_quit(data);
 		}
 	}
+	if ctrl_down && keycode == Keycode::W {
+		if shift_down {
+			close_charmap(data);
+		} else {
+			try_close_charmap(data);
+		}
+	}
 	
 	if ctrl_down && keycode == Keycode::S {
 		if let Some(edit_charmap_data) = &mut data.edit_charmap_data {
@@ -91,20 +98,33 @@ pub fn handle_key_down(keycode: Keycode, ctrl_down: bool, shift_down: bool, data
 		
 		CurrentPrioritizedAction::CreatingNewCharmap => {
 			let new_charmap_data = data.new_charmap_data.as_mut().expect("current_prioritized_action() cannot be CreatingNewCharmap when data.new_charmap_data is empty");
-			if keycode == Keycode::Return && new_charmap_data.selection == NewCharmapSelection::CreateButton {
-				create_new_editing_charmap(data);
+			if keycode == Keycode::Escape {
+				data.new_charmap_data = None;
+				
+			} else if keycode == Keycode::Return {
+				match new_charmap_data.selection {
+					NewCharmapSelection::CreateButton => {
+						create_new_editing_charmap(data);
+					}
+					NewCharmapSelection::CancelButton => {
+						data.new_charmap_data = None;
+					}
+					NewCharmapSelection::WidthInput | NewCharmapSelection::HeightInput => {
+						new_charmap_data.selection = new_charmap_data.selection.next_down();
+					}
+				}
 			} else {
 				if keycode == Keycode::Up {
 					new_charmap_data.selection = new_charmap_data.selection.next_up();
 				}
-				if keycode == Keycode::Down || keycode == Keycode::Return {
+				if keycode == Keycode::Down {
 					new_charmap_data.selection = new_charmap_data.selection.next_down();
 				}
 				if keycode == Keycode::Backspace {
 					match new_charmap_data.selection {
 						NewCharmapSelection::WidthInput => { new_charmap_data.width_input.pop(); }
 						NewCharmapSelection::HeightInput => { new_charmap_data.height_input.pop(); }
-						NewCharmapSelection::CreateButton => {}
+						NewCharmapSelection::CreateButton | NewCharmapSelection::CancelButton => {}
 					}
 				}
 			}
@@ -127,7 +147,7 @@ pub fn handle_text_input(new_text: String, data: &mut ProgramData) {
 			match new_charmap_data.selection {
 				NewCharmapSelection::WidthInput => new_charmap_data.width_input += &new_text,
 				NewCharmapSelection::HeightInput => new_charmap_data.height_input += &new_text,
-				NewCharmapSelection::CreateButton => {}
+				NewCharmapSelection::CreateButton | NewCharmapSelection::CancelButton => {}
 			}
 		}
 		
@@ -171,6 +191,7 @@ pub fn create_new_editing_charmap(data: &mut ProgramData) {
 		save_path: None,
 		is_saved: false,
 		cursor_pos: (0, 0),
+		curr_colors: (COLOR_BLACK, COLOR_WHITE, COLOR_WHITE),
 	});
 	data.new_charmap_data = None;
 	
@@ -189,4 +210,20 @@ pub fn try_quit(data: &mut ProgramData) {
 pub fn quit(data: &mut ProgramData) {
 	println!("Closing");
 	data.should_quit = true;
+}
+
+
+
+pub fn try_close_charmap(data: &mut ProgramData) {
+	let Some(edit_charmap_data) = &mut data.edit_charmap_data else { return; };
+	if !edit_charmap_data.is_saved {
+		display_warning("Cannot close charmap, it is not saved", &mut data.current_message);
+		return;
+	}
+	close_charmap(data);
+}
+
+pub fn close_charmap(data: &mut ProgramData) {
+	data.edit_charmap_data = None;
+	display_message("Closed charmap", &mut data.current_message);
 }

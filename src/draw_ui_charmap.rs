@@ -68,10 +68,26 @@ pub fn place_colors_and_chars(data: &mut ProgramData) {
 		}
 	}
 	
-	place_text("Characters:", (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 2, 21), (COLOR_BLACK, COLOR_WHITE, 0), &mut data.ui_charmap);
-	place_siding(SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 3, SCREEN_CHAR_WIDTH - 2, 22, 39, (COLOR_BLACK, COLOR_DARK_GREY, COLOR_LIGHT_GREY), &mut data.ui_charmap);
+	place_text("Background:"  , (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 2, 21), (COLOR_BLACK, COLOR_WHITE, 0), &mut data.ui_charmap);
+	place_text("Foreground 1:", (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 2, 22), (COLOR_BLACK, COLOR_WHITE, 0), &mut data.ui_charmap);
+	place_text("Foreground 2:", (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 2, 23), (COLOR_BLACK, COLOR_WHITE, 0), &mut data.ui_charmap);
+	if let Some(edit_charmap_data) = &data.edit_charmap_data {
+		let colors = edit_charmap_data.curr_colors;
+		place_text("  ", (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE + 12, 21), (colors.0, colors.0, colors.0), &mut data.ui_charmap);
+		place_text("  ", (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE + 12, 22), (colors.1, colors.1, colors.1), &mut data.ui_charmap);
+		place_text("  ", (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE + 12, 23), (colors.2, colors.2, colors.2), &mut data.ui_charmap);
+		data.ui_charmap.place(CHAR_SIDING_LEFT, (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE + 11, 21), (COLOR_BLACK, COLOR_WHITE, COLOR_BLACK));
+		data.ui_charmap.place(CHAR_SIDING_LEFT, (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE + 11, 22), (COLOR_BLACK, COLOR_WHITE, COLOR_BLACK));
+		data.ui_charmap.place(CHAR_SIDING_LEFT, (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE + 11, 23), (COLOR_BLACK, COLOR_WHITE, COLOR_BLACK));
+		data.ui_charmap.place(CHAR_SIDING_RIGHT, (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE + 14, 21), (COLOR_BLACK, COLOR_WHITE, COLOR_BLACK));
+		data.ui_charmap.place(CHAR_SIDING_RIGHT, (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE + 14, 22), (COLOR_BLACK, COLOR_WHITE, COLOR_BLACK));
+		data.ui_charmap.place(CHAR_SIDING_RIGHT, (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE + 14, 23), (COLOR_BLACK, COLOR_WHITE, COLOR_BLACK));
+	}
+	
+	place_text("Characters:", (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 2, 25), (COLOR_BLACK, COLOR_WHITE, 0), &mut data.ui_charmap);
+	place_siding(SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 3, SCREEN_CHAR_WIDTH - 2, 26, 43, (COLOR_BLACK, COLOR_DARK_GREY, COLOR_LIGHT_GREY), &mut data.ui_charmap);
 	let mut c = 0;
-	for y in 23..39 {
+	for y in 27..43 {
 		for x in SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 2 .. SCREEN_CHAR_WIDTH - 2 {
 			data.ui_charmap.place(c, (x, y), (COLOR_BLACK, COLOR_WHITE, COLOR_BRIGHT_YELLOW));
 			c = c.wrapping_add(1);
@@ -110,6 +126,9 @@ pub fn show_new_charmap_screen(data: &mut ProgramData) {
 	
 	let color = if new_charmap_data.selection == NewCharmapSelection::CreateButton { (COLOR_WHITE, COLOR_BLACK, 0) } else { (COLOR_DARK_GREY, COLOR_WHITE, 0) };
 	place_button_text(format!("Create Charmap"), (3, 13), color, COLOR_BLACK, &mut data.ui_charmap);
+	
+	let color = if new_charmap_data.selection == NewCharmapSelection::CancelButton { (COLOR_WHITE, COLOR_BLACK, 0) } else { (COLOR_DARK_GREY, COLOR_WHITE, 0) };
+	place_button_text(format!("Cancel"), (3, 16), color, COLOR_BLACK, &mut data.ui_charmap);
 	
 }
 

@@ -76,6 +76,7 @@ pub struct EditCharmapData {
 	pub save_path: Option<PathBuf>,
 	pub is_saved: bool,
 	pub cursor_pos: (u16, u16),
+	pub curr_colors: (u8, u8, u8),
 }
 
 pub struct CurrentMessage {
@@ -95,6 +96,7 @@ pub enum NewCharmapSelection {
 	WidthInput,
 	HeightInput,
 	CreateButton,
+	CancelButton,
 }
 
 impl Default for NewCharmapData {
@@ -112,14 +114,16 @@ impl NewCharmapSelection {
 		match self {
 			Self::WidthInput => Self::HeightInput,
 			Self::HeightInput => Self::CreateButton,
-			Self::CreateButton => Self::CreateButton,
+			Self::CreateButton => Self::CancelButton,
+			Self::CancelButton => Self::WidthInput,
 		}
 	}
 	pub fn next_up(self) -> Self {
 		match self {
-			Self::WidthInput => Self::WidthInput,
+			Self::WidthInput => Self::CancelButton,
 			Self::HeightInput => Self::WidthInput,
 			Self::CreateButton => Self::HeightInput,
+			Self::CancelButton => Self::CreateButton,
 		}
 	}
 }
