@@ -20,24 +20,25 @@ pub fn main_init() -> Result<MainInitData> {
 	}
 	env_logger::init();
 	
-	let assets_path = get_assets_path()?;
+	let assets_path = get_assets_path().context("Failed to find path of assets folder")?;
 	
 	// sdl
-	let sdl = sdl3::init()?;
-	let video = sdl.video()?;
+	let sdl = sdl3::init().context("Failed to initialize Sdl3")?;
+	let video = sdl.video().context("Failed to initialize Sdl3's video subsystem")?;
 	let mut window = video
 		.window("Character Screen", SCREEN_WIDTH as u32, SCREEN_HEIGHT as u32)
 		.position_centered()
 		.resizable()
 		//.maximized()
 		.metal_view()
-		.build()?;
+		.build()
+		.context("Failed to create a window with Sdl3")?;
 	window.maximize();
 	window.subsystem().text_input().start(&window); // allows Event::TextInput to work
 	let window_size = window.size();
-	let event_pump = sdl.event_pump()?;
+	let event_pump = sdl.event_pump().context("Failed to create an event pump with Sdl3")?;
 	
-	let gpu_instance = simple_gpu::init(wgpu::Limits::defaults(), wgpu::MemoryHints::Performance)?;
+	let gpu_instance = simple_gpu::init(wgpu::Limits::defaults(), wgpu::MemoryHints::Performance).context("Failed to initialize the graphics stack")?;
 	
 	Ok(MainInitData {
 		assets_path,

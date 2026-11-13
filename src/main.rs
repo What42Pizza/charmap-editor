@@ -62,7 +62,8 @@ pub struct ProgramData {
 	pub char_atlas_tex: SimpleTex,
 	pub colors_lut_tex: SimpleTex,
 	pub ui_charmap: charmap_renderer::Charmap,
-	pub editing_charmap: Option<(charmap_renderer::Charmap, PathBuf)>,
+	pub editing_charmap: Option<charmap_renderer::Charmap>,
+	pub editing_charmap_path: Option<PathBuf>,
 	
 }
 
@@ -78,10 +79,14 @@ pub struct SimpleTex {
 fn main() {
 	let result = main_result();
 	if let StdErr(err) = result {
-		println!("Fatal error while running program:\n{err:?}");
+		let mut error = format!("{err}");
+		for cause in err.chain().skip(1) {
+			error += &format!("\nCaused by: {cause}");
+		}
+		println!("Fatal error while running program:\n{error}");
 		rfd::MessageDialog::new()
 			.set_title("Program Crash")
-			.set_description(format!("An unrecoverable error has occurred: {err}"))
+			.set_description(format!("An unrecoverable error has occurred:{error}"))
 			.set_level(rfd::MessageLevel::Error)
 			.set_buttons(rfd::MessageButtons::Ok)
 			.show();
@@ -99,7 +104,7 @@ fn main_result() -> Result<()> {
 		window_size,
 		mut event_pump,
 		mut gpu_instance,
-	} = main_init()?;
+	} = main_init().context("Failed to initialize basic program data")?;
 	
 	// misc init
 	let (window, window_surface) = simple_gpu::get_window_surface_mut(
@@ -108,15 +113,15 @@ fn main_result() -> Result<()> {
 		window_size,
 		wgpu::PresentMode::AutoVsync,
 	);
-	let mut window_surface = window_surface?;
+	let mut window_surface = window_surface.context("Failed to get the window's drawable surface")?;
 	let charmap_render_data = charmap_renderer::make_render_data(
 		wgpu::TextureFormat::Rgba8Unorm,
 		&gpu_instance,
 	);
 	
 	// textures
-	let char_atlas_tex = load_character_atlas(&assets_path, &gpu_instance)?;
-	let colors_lut_tex = load_colors_lut(&assets_path, &gpu_instance)?;
+	let char_atlas_tex = load_character_atlas(&assets_path, &gpu_instance).context("Failed to load character atlas texture")?;
+	let colors_lut_tex = load_colors_lut(&assets_path, &gpu_instance).context("Failed to load colors LUT texture")?;
 	let intermediate_tex = simple_gpu::create_texture("Intermediate Render Texture", (SCREEN_WIDTH as u32, SCREEN_HEIGHT as u32), wgpu::TextureFormat::Rgba8Unorm, wgpu::FilterMode::Linear, 1, &gpu_instance);
 	
 	// final render pass
@@ -130,7 +135,7 @@ fn main_result() -> Result<()> {
 			("SCREEN_CHAR_WIDTH", &SCREEN_CHAR_WIDTH.to_string()),
 			("SCREEN_CHAR_HEIGHT", &SCREEN_CHAR_HEIGHT.to_string()),
 		]
-	)?;
+	).context("Failed to load post-processing shader")?;
 	let final_pipeline = simple_gpu::create_2d_pipeline("Final Pipeline", &[], &final_shaders, &[window_surface.wgpu_format], &mut gpu_instance);
 	let final_uniforms = simple_gpu::create_uniforms_buffer(&gpu_instance);
 	
@@ -163,6 +168,7 @@ fn main_result() -> Result<()> {
 		colors_lut_tex,
 		ui_charmap,
 		editing_charmap: None,
+		editing_charmap_path: None,
 		
 	};
 	
@@ -177,7 +183,7 @@ fn main_result() -> Result<()> {
 		render(&mut data, window, &mut window_surface);
 		data.fps_counter.tick();
 		
-		check_and_update_textures(&mut data)?;
+		check_and_update_textures(&mut data).context("Failed to check for or load updated input textures")?;
 	}
 	
 	Ok(())
@@ -189,20 +195,23 @@ pub fn check_and_update_textures(data: &mut ProgramData) -> Result<()> {
 	
 	let mut needs_rebind = false;
 	
-	if last_modified_time(&data.char_atlas_tex.path)? != data.char_atlas_tex.last_modified_time {
-		data.char_atlas_tex = load_character_atlas(&data.assets_path, &data.gpu_instance)?;
+	let char_atlas_time = last_modified_time(&data.char_atlas_tex.path).context("Failed to get the last modified time of the character atlas texture")?;
+	if char_atlas_time != data.char_atlas_tex.last_modified_time {
+		data.char_atlas_tex = load_character_atlas(&data.assets_path, &data.gpu_instance).context("Failed to load character atlas texture")?;
 		needs_rebind = true;
 		println!("Reloaded the character atlas texture");
 	}
-	if last_modified_time(&data.colors_lut_tex.path)? != data.colors_lut_tex.last_modified_time {
-		data.colors_lut_tex = load_colors_lut(&data.assets_path, &data.gpu_instance)?;
+	
+	let colors_lut_time = last_modified_time(&data.colors_lut_tex.path).context("Failed to get the last modified time of the colors LUT texture")?;
+	if colors_lut_time != data.colors_lut_tex.last_modified_time {
+		data.colors_lut_tex = load_colors_lut(&data.assets_path, &data.gpu_instance).context("Failed to load colors LUT texture")?;
 		needs_rebind = true;
 		println!("Reloaded the colors LUT texture");
 	}
 	
 	if needs_rebind {
 		data.ui_charmap.update_textures(&data.char_atlas_tex.view, &data.colors_lut_tex.view, &mut data.charmap_render_data, &data.gpu_instance);
-		if let Some((editing_charmap, _editing_charmap_path)) = &mut data.editing_charmap {
+		if let Some(editing_charmap) = &mut data.editing_charmap {
 			editing_charmap.update_textures(&data.char_atlas_tex.view, &data.colors_lut_tex.view, &mut data.charmap_render_data, &data.gpu_instance);
 		}
 	}

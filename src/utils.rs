@@ -63,7 +63,7 @@ pub fn place_border(
 
 
 pub fn get_assets_path() -> Result<PathBuf> {
-	let mut output = std::env::current_exe()?;
+	let mut output = std::env::current_exe().context("Failed to get the path of the current program binary")?;
 	loop {
 		output.push("assets");
 		if output.exists() {

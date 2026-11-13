@@ -54,7 +54,7 @@ pub fn handle_key_down(keycode: Keycode, data: &mut ProgramData, window: &mut Wi
 	
 	if keycode == Keycode::F11 {
 		let fullscreen = window.fullscreen_state() == FullscreenType::True;
-		window.set_fullscreen(!fullscreen)?;
+		window.set_fullscreen(!fullscreen).context("Failed to toggle fullscreen")?;
 	}
 	
 	if keycode == Keycode::Escape {
