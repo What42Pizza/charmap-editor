@@ -83,9 +83,10 @@ pub struct EditCharmapData {
 	pub charmap: charmap_renderer::Charmap,
 	pub save_path: Option<PathBuf>, // note: if this is `Some`, the path should not be empty
 	pub is_saved: bool,
-	pub draw_offset: (u16, u16),
+	pub view_offset: (u16, u16), // this specifies which position in this charmap should be in the top-right of the work area
 	pub cursor_pos: (u16, u16),
-	pub curr_colors: (u8, u8, u8),
+	pub selected_char: u8,
+	pub selected_colors: (u8, u8, u8),
 }
 
 

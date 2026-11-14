@@ -19,6 +19,10 @@ pub const CHAR_SIDING_BOTTOM_LEFT : u8 = 16;
 pub const CHAR_SIDING_BOTTOM_RIGHT: u8 = 17;
 
 pub const CHAR_SELECTOR: u8 = 18;
+pub const CHAR_SELECTOR_TOP_LEFT: u8 = 19;
+pub const CHAR_SELECTOR_TOP_RIGHT: u8 = 20;
+pub const CHAR_SELECTOR_BOTTOM_LEFT: u8 = 21;
+pub const CHAR_SELECTOR_BOTTOM_RIGHT: u8 = 22;
 
 
 
@@ -35,6 +39,8 @@ pub const COLOR_BRIGHT_BLUE   : u8 = 8;
 pub const COLOR_BRIGHT_YELLOW : u8 = 9;
 pub const COLOR_BRIGHT_CYAN   : u8 = 10;
 pub const COLOR_BRIGHT_MAGENTA: u8 = 11;
+
+pub const COLOR_ORANGE: u8 = 27;
 
 pub const COLOR_ERROR_RED     : u8 = 22;
 pub const COLOR_WARNING_YELLOW: u8 = 38;

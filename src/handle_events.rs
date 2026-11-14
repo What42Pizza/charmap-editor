@@ -1,6 +1,5 @@
-use std::{ffi::OsStr, fs};
-
 use crate::*;
+use std::fs;
 use sdl3::{EventPump, keyboard, video::FullscreenType};
 
 
@@ -227,9 +226,10 @@ pub fn create_new_editing_charmap(data: &mut ProgramData) {
 		charmap: editing_charmap,
 		save_path: None,
 		is_saved: false,
-		draw_offset: (0, 0),
+		view_offset: (0, 0),
 		cursor_pos: (0, 0),
-		curr_colors: (COLOR_BLACK, COLOR_WHITE, COLOR_WHITE),
+		selected_char: CHAR_EDGE_HORIZONTAL,
+		selected_colors: (COLOR_BLACK, COLOR_WHITE, COLOR_WHITE),
 	});
 	data.new_charmap_data = None;
 	
