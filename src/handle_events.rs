@@ -1,5 +1,5 @@
 use crate::*;
-use std::fs;
+use std::{ffi::OsStr, fs};
 use sdl3::{EventPump, keyboard, video::FullscreenType};
 
 
@@ -250,7 +250,9 @@ pub fn save_charmap(data: &mut ProgramData) {
 		display_error("Cannot save with an empty file name", &mut data.current_message);
 		return;
 	}
-	save_path.set_extension("dat");
+	if save_path.extension() != Some(OsStr::new("dat")) {
+		save_path.as_mut_os_string().push(".dat");
+	}
 	
 	let mut data_to_save = vec![];
 	data_to_save.extend_from_slice(&0u16.to_le_bytes()); // first two bytes: format version number (which is 0)
