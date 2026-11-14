@@ -40,7 +40,7 @@ pub const COLOR_BRIGHT_YELLOW : u8 = 9;
 pub const COLOR_BRIGHT_CYAN   : u8 = 10;
 pub const COLOR_BRIGHT_MAGENTA: u8 = 11;
 
-pub const COLOR_ORANGE: u8 = 27;
+pub const COLOR_BRIGHT_ORANGE: u8 = 25;
 
 pub const COLOR_ERROR_RED     : u8 = 22;
 pub const COLOR_WARNING_YELLOW: u8 = 38;

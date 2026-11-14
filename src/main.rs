@@ -1,5 +1,5 @@
-pub const SCREEN_CHAR_WIDTH: u16 = 120;
-pub const SCREEN_CHAR_HEIGHT: u16 = 60;
+pub const SCREEN_CHAR_WIDTH: u16 = 128;
+pub const SCREEN_CHAR_HEIGHT: u16 = 56;
 pub const SCREEN_WIDTH: u16 = SCREEN_CHAR_WIDTH * charmap_renderer::CHAR_WIDTH as u16;
 pub const SCREEN_HEIGHT: u16 = SCREEN_CHAR_HEIGHT * charmap_renderer::CHAR_HEIGHT as u16;
 

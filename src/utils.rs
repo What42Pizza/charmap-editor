@@ -3,7 +3,7 @@ use std::time::Duration;
 
 
 
-pub fn place_button_text(text: impl AsRef<str>, pos: (u16, u16), colors: (u8, u8, u8), background_color: u8, charmap: &mut charmap_renderer::Charmap) -> u16 {
+pub fn place_bordered_text(text: impl AsRef<str>, pos: (u16, u16), colors: (u8, u8, u8), background_color: u8, charmap: &mut charmap_renderer::Charmap) -> u16 {
 	let text_len = place_text(text, (pos.0 + 1, pos.1 + 1), colors, charmap);
 	let colors = (background_color, colors.0, colors.0);
 	place_siding(pos.0, pos.0 + text_len + 1, pos.1, pos.1 + 2, colors, charmap);
