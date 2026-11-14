@@ -60,6 +60,7 @@ pub struct ProgramData {
 	pub show_help: bool,
 	pub current_message: CurrentMessage,
 	pub new_charmap_data: Option<NewCharmapData>,
+	pub set_save_path_data: Option<SetSavePathData>,
 	
 }
 
@@ -70,20 +71,24 @@ pub struct SimpleTex {
 	pub last_modified_time: SystemTime,
 }
 
+pub struct CurrentMessage {
+	pub message: String,
+	pub disappear_time: Instant,
+	pub colors: (u8, u8),
+}
+
+
+
 pub struct EditCharmapData {
 	pub charmap: charmap_renderer::Charmap,
-	pub save_path: Option<PathBuf>,
+	pub save_path: Option<PathBuf>, // note: if this is `Some`, the path should not be empty
 	pub is_saved: bool,
 	pub draw_offset: (u16, u16),
 	pub cursor_pos: (u16, u16),
 	pub curr_colors: (u8, u8, u8),
 }
 
-pub struct CurrentMessage {
-	pub message: String,
-	pub disappear_time: Instant,
-	pub colors: (u8, u8),
-}
+
 
 pub struct NewCharmapData {
 	pub width_input: String,
@@ -130,15 +135,23 @@ impl NewCharmapSelection {
 
 
 
+pub struct SetSavePathData {
+	pub curr_path: String,
+}
+
+
+
 #[derive(PartialEq)]
 pub enum CurrentPrioritizedAction {
 	// ordered from most to least important
+	SettingSavePath,
 	CreatingNewCharmap,
 	ShowingHelpScreen,
 	Nothing,
 }
 
 pub fn current_prioritized_action(data: &ProgramData) -> CurrentPrioritizedAction {
+	if data.set_save_path_data.is_some() { return CurrentPrioritizedAction::SettingSavePath; }
 	if data.new_charmap_data.is_some() { return CurrentPrioritizedAction::CreatingNewCharmap; }
 	if data.show_help { return CurrentPrioritizedAction::ShowingHelpScreen; }
 	CurrentPrioritizedAction::Nothing
@@ -246,6 +259,7 @@ fn main_result() -> Result<()> {
 			colors: (1, 5),
 		},
 		new_charmap_data: None,
+		set_save_path_data: None,
 		
 	};
 	

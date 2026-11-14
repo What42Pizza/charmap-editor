@@ -18,6 +18,9 @@ pub fn update_ui_charmap(data: &mut ProgramData) {
 	
 	place_button_text("Press H to show controls", (1, 1), (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
 	match prioritized_action {
+		CurrentPrioritizedAction::SettingSavePath => {
+			show_set_save_path_screen(data);
+		}
 		CurrentPrioritizedAction::CreatingNewCharmap => {
 			show_new_charmap_screen(data);
 		}
@@ -137,6 +140,15 @@ pub fn show_new_charmap_screen(data: &mut ProgramData) {
 	
 	let color = if new_charmap_data.selection == NewCharmapSelection::CancelButton { (COLOR_WHITE, COLOR_BLACK, 0) } else { (COLOR_DARK_GREY, COLOR_WHITE, 0) };
 	place_button_text(format!("Cancel"), (3, 16), color, COLOR_BLACK, &mut data.ui_charmap);
+	
+}
+
+pub fn show_set_save_path_screen(data: &mut ProgramData) {
+	let Some(set_save_path_data) = &data.set_save_path_data else { panic!("Cannot call show_set_save_path_screen() when set_save_path_data is empty"); };
+	
+	place_button_text("Enter name of file to save as:", (3, 7), (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
+	place_button_text(&set_save_path_data.curr_path, (3, 10), (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
+	place_button_text("Press enter or esc when ready", (3, 7), (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
 	
 }
 

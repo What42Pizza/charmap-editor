@@ -1,3 +1,5 @@
+use std::{ffi::OsStr, fs};
+
 use crate::*;
 use sdl3::{EventPump, keyboard, video::FullscreenType};
 
@@ -81,7 +83,11 @@ pub fn handle_key_down(keycode: Keycode, ctrl_down: bool, shift_down: bool, data
 	
 	if ctrl_down && keycode == Keycode::S {
 		if let Some(edit_charmap_data) = &mut data.edit_charmap_data {
-			
+			if edit_charmap_data.save_path.is_some() {
+				save_charmap(data);
+			} else {
+				data.set_save_path_data = Some(SetSavePathData { curr_path: String::new() });
+			}
 		} else {
 			display_error("Cannot save, no charmap is loaded", &mut data.current_message);
 		}
@@ -96,11 +102,32 @@ pub fn handle_key_down(keycode: Keycode, ctrl_down: bool, shift_down: bool, data
 	
 	match current_prioritized_action(data) {
 		
+		CurrentPrioritizedAction::SettingSavePath => {
+			let set_save_path_data = data.set_save_path_data.as_mut().expect("current_prioritized_action() cannot be SettingSavePath when data.set_save_path_data is empty");
+			if keycode == Keycode::Escape {
+				data.set_save_path_data = None;
+				display_message("Canceled saving charmap", &mut data.current_message);
+			} else if keycode == Keycode::Return {
+				if let Some(edit_charmap_data) = &mut data.edit_charmap_data {
+					if set_save_path_data.curr_path.is_empty() {
+						display_error("Cannot save with an empty file name", &mut data.current_message);
+					} else {
+						edit_charmap_data.save_path = Some(PathBuf::from(set_save_path_data.curr_path.clone()));
+						save_charmap(data);
+					}
+				} else {
+					display_error("Cannot save: no charmap is present", &mut data.current_message);
+				}
+			} else if keycode == Keycode::Backspace {
+				set_save_path_data.curr_path.pop();
+			}
+		}
+		
 		CurrentPrioritizedAction::CreatingNewCharmap => {
 			let new_charmap_data = data.new_charmap_data.as_mut().expect("current_prioritized_action() cannot be CreatingNewCharmap when data.new_charmap_data is empty");
 			if keycode == Keycode::Escape {
 				data.new_charmap_data = None;
-				
+				display_message("Canceled creating new charmap", &mut data.current_message);
 			} else if keycode == Keycode::Return {
 				match new_charmap_data.selection {
 					NewCharmapSelection::CreateButton => {
@@ -141,6 +168,11 @@ pub fn handle_key_down(keycode: Keycode, ctrl_down: bool, shift_down: bool, data
 
 pub fn handle_text_input(new_text: String, data: &mut ProgramData) {
 	match current_prioritized_action(data) {
+		
+		CurrentPrioritizedAction::SettingSavePath => {
+			let set_save_path_data = data.set_save_path_data.as_mut().expect("current_prioritized_action() cannot be SettingSavePath when data.set_save_path_data is empty");
+			set_save_path_data.curr_path += &new_text;
+		}
 		
 		CurrentPrioritizedAction::CreatingNewCharmap => {
 			let new_charmap_data = data.new_charmap_data.as_mut().expect("current_prioritized_action() cannot be CreatingNewCharmap when data.new_charmap_data is empty");
@@ -201,6 +233,40 @@ pub fn create_new_editing_charmap(data: &mut ProgramData) {
 	});
 	data.new_charmap_data = None;
 	
+}
+
+
+
+pub fn save_charmap(data: &mut ProgramData) {
+	let Some(edit_charmap_data) = &mut data.edit_charmap_data else {
+		display_error("Failed to save: no charmap is present", &mut data.current_message);
+		return;
+	};
+	let Some(save_path) = &mut edit_charmap_data.save_path else {
+		display_error("Failed to save: charmap does not have any save path", &mut data.current_message);
+		return;
+	};
+	if save_path.is_empty() {
+		display_error("Cannot save with an empty file name", &mut data.current_message);
+		return;
+	}
+	save_path.set_extension("dat");
+	
+	let mut data_to_save = vec![];
+	data_to_save.extend_from_slice(&0u16.to_le_bytes()); // first two bytes: format version number (which is 0)
+	data_to_save.extend_from_slice(&edit_charmap_data.charmap.size.0.to_le_bytes()); // next two bytes: charmap width
+	data_to_save.extend_from_slice(&edit_charmap_data.charmap.size.1.to_le_bytes()); // next two bytes: charmap height
+	// next: all charmap data
+	data_to_save.extend_from_slice(&edit_charmap_data.charmap);
+	
+	let result = fs::write(save_path, data_to_save);
+	if let StdErr(err) = result {
+		display_error(format!("Error saving: {err}"), &mut data.current_message);
+	} else {
+		edit_charmap_data.is_saved = true;
+		data.set_save_path_data = None;
+		display_message("Saved successfully", &mut data.current_message);
+	}
 }
 
 
