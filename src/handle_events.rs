@@ -185,11 +185,17 @@ pub fn create_new_editing_charmap(data: &mut ProgramData) {
 		return;
 	}
 	
+	let mut editing_charmap = charmap_renderer::Charmap::new("Editing Charmap", (width, height), &data.char_atlas_tex.view, &data.colors_lut_tex.view, &data.charmap_render_data, &data.gpu_instance);
+	for (i, v) in editing_charmap.buffer.cpu_copy.iter_mut().enumerate() {
+		*v = (i as u8) % 4;
+	}
+	editing_charmap.update_gpu(&data.gpu_instance);
+	
 	data.edit_charmap_data = Some(EditCharmapData {
-		data: vec![0; width as usize * height as usize * 4],
-		size: (width, height),
+		charmap: editing_charmap,
 		save_path: None,
 		is_saved: false,
+		draw_offset: (0, 0),
 		cursor_pos: (0, 0),
 		curr_colors: (COLOR_BLACK, COLOR_WHITE, COLOR_WHITE),
 	});

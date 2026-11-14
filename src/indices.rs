@@ -22,18 +22,19 @@ pub const CHAR_SELECTOR: u8 = 18;
 
 
 
-pub const COLOR_BLACK     : u8 = 0;
-pub const COLOR_DARK_GREY : u8 = 1;
-pub const COLOR_GREY      : u8 = 2;
-pub const COLOR_LIGHT_GREY: u8 = 3;
-pub const COLOR_WHITE     : u8 = 4;
+pub const COLOR_TRANSPARENT: u8 = 0;
+pub const COLOR_BLACK      : u8 = 1;
+pub const COLOR_DARK_GREY  : u8 = 2;
+pub const COLOR_GREY       : u8 = 3;
+pub const COLOR_LIGHT_GREY : u8 = 4;
+pub const COLOR_WHITE      : u8 = 5;
 
-pub const COLOR_BRIGHT_RED    : u8 = 5;
-pub const COLOR_BRIGHT_GREEN  : u8 = 6;
-pub const COLOR_BRIGHT_BLUE   : u8 = 7;
-pub const COLOR_BRIGHT_YELLOW : u8 = 8;
-pub const COLOR_BRIGHT_CYAN   : u8 = 9;
-pub const COLOR_BRIGHT_MAGENTA: u8 = 10;
+pub const COLOR_BRIGHT_RED    : u8 = 6;
+pub const COLOR_BRIGHT_GREEN  : u8 = 7;
+pub const COLOR_BRIGHT_BLUE   : u8 = 8;
+pub const COLOR_BRIGHT_YELLOW : u8 = 9;
+pub const COLOR_BRIGHT_CYAN   : u8 = 10;
+pub const COLOR_BRIGHT_MAGENTA: u8 = 11;
 
-pub const COLOR_ERROR_RED     : u8 = 21;
-pub const COLOR_WARNING_YELLOW: u8 = 37;
+pub const COLOR_ERROR_RED     : u8 = 22;
+pub const COLOR_WARNING_YELLOW: u8 = 38;

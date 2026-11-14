@@ -7,11 +7,12 @@ const RIGHT_PANEL_SIZE: u16 = 16;
 
 
 pub fn update_ui_charmap(data: &mut ProgramData) {
-	data.ui_charmap.buffer.fill(0);
+	data.ui_charmap.buffer.fill(1);
 	place_border(0, SCREEN_CHAR_WIDTH - 1, 0, SCREEN_CHAR_HEIGHT - 1, (COLOR_BLACK, COLOR_BRIGHT_RED, 0), &mut data.ui_charmap);
 	
 	place_basic_edges(data);
 	place_colors_and_chars(data);
+	fill_work_area_with_transparency(data);
 	
 	let prioritized_action = current_prioritized_action(data);
 	
@@ -94,6 +95,13 @@ pub fn place_colors_and_chars(data: &mut ProgramData) {
 		}
 	}
 	
+}
+
+pub fn fill_work_area_with_transparency(data: &mut ProgramData) {
+	let charmap_data = &mut data.ui_charmap.buffer.cpu_copy;
+	for y in 7 .. SCREEN_CHAR_HEIGHT - 3 {
+		charmap_data[(3 + y * SCREEN_CHAR_WIDTH) as usize * 4 .. (SCREEN_CHAR_WIDTH - RIGHT_PANEL_SIZE - 7 + y * SCREEN_CHAR_WIDTH) as usize * 4].fill(COLOR_TRANSPARENT); // also fills the character id but that's fine
+	}
 }
 
 

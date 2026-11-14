@@ -112,11 +112,22 @@ pub fn render(data: &mut ProgramData, window: &Window, window_surface: &mut simp
 		occlusion_query_set: None,
 		multiview_mask: None,
 	});
-	charmap_renderer::render(
-		&[&data.ui_charmap],
-		&mut charmap_render_pass,
-		&mut data.charmap_render_data,
-	);
+	if let Some(edit_charmap_data) = &data.edit_charmap_data {
+		charmap_renderer::render(
+			&[
+				&edit_charmap_data.charmap,
+				&data.ui_charmap,
+			],
+			&mut charmap_render_pass,
+			&mut data.charmap_render_data,
+		);
+	} else {
+		charmap_renderer::render(
+			&[&data.ui_charmap],
+			&mut charmap_render_pass,
+			&mut data.charmap_render_data,
+		);
+	}
 	simple_gpu::finish_render_pass(charmap_render_pass);
 	
 	// render intermediate tex to screen

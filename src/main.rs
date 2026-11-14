@@ -71,10 +71,10 @@ pub struct SimpleTex {
 }
 
 pub struct EditCharmapData {
-	pub data: Vec<u8>,
-	pub size: (u16, u16),
+	pub charmap: charmap_renderer::Charmap,
 	pub save_path: Option<PathBuf>,
 	pub is_saved: bool,
+	pub draw_offset: (u16, u16),
 	pub cursor_pos: (u16, u16),
 	pub curr_colors: (u8, u8, u8),
 }
@@ -288,6 +288,9 @@ pub fn check_and_update_textures(data: &mut ProgramData) -> Result<()> {
 	
 	if needs_rebind {
 		data.ui_charmap.update_textures(&data.char_atlas_tex.view, &data.colors_lut_tex.view, &data.charmap_render_data, &data.gpu_instance);
+		if let Some(edit_charmap_data) = &mut data.edit_charmap_data {
+			edit_charmap_data.charmap.update_textures(&data.char_atlas_tex.view, &data.colors_lut_tex.view, &data.charmap_render_data, &data.gpu_instance);
+		}
 	}
 	
 	Ok(())
