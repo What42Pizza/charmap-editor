@@ -95,7 +95,7 @@ pub fn place_siding(
 pub fn display_message(message: impl Into<String>, current_message: &mut CurrentMessage) {
 	current_message.message = message.into();
 	current_message.disappear_time = Instant::now() + Duration::from_secs(3);
-	current_message.colors = (COLOR_DARK_GREY, COLOR_WHITE);
+	current_message.colors = (COLOR_DARK_GRAY, COLOR_WHITE);
 }
 
 pub fn display_warning(message: impl Into<String>, current_message: &mut CurrentMessage) {

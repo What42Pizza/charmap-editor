@@ -244,7 +244,7 @@ fn main_result() -> Result<()> {
 			fish_eye_amount: 0.75,
 			scaling_factor: 1.0,
 			background_color: (20, 20, 30),
-			scanline_amount: 0.5,
+			scanline_amount: 0.4,
 			scanline_scale: 4.0,
 		},
 		

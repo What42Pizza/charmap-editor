@@ -30,7 +30,7 @@ pub fn update_ui_charmap(data: &mut ProgramData) {
 	
 	let prioritized_action = current_prioritized_action(data);
 	
-	place_bordered_text("Press H to show controls", (1, 1), (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
+	place_bordered_text("Press H to show controls", (1, 1), (COLOR_DARK_GRAY, COLOR_WHITE, 0), COLOR_BLACK, &mut data.ui_charmap);
 	match prioritized_action {
 		CurrentPrioritizedAction::SettingSavePath => {
 			show_set_save_path_screen(data);
@@ -65,19 +65,22 @@ pub fn place_basic_edges(data: &mut ProgramData) {
 	for y in 1 .. SCREEN_CHAR_HEIGHT - 1 {
 		data.ui_charmap.place(CHAR_EDGE_VERTICAL, (RIGHT_PANEL_EDGE, y), (COLOR_BLACK, COLOR_WHITE, 0));
 	}
+	data.ui_charmap.place(CHAR_EDGE_TOP_INTERSECT   , (RIGHT_PANEL_EDGE, 0),(COLOR_BLACK, COLOR_BRIGHT_RED, COLOR_WHITE));
+	data.ui_charmap.place(CHAR_EDGE_BOTTOM_INTERSECT, (RIGHT_PANEL_EDGE, SCREEN_CHAR_HEIGHT - 1),(COLOR_BLACK, COLOR_BRIGHT_RED, COLOR_WHITE));
 	
 	// top panel border
 	for x in 1 .. RIGHT_PANEL_EDGE {
 		data.ui_charmap.place(CHAR_EDGE_HORIZONTAL, (x, TOP_PANEL_EDGE), (COLOR_BLACK, COLOR_WHITE, 0));
 	}
 	data.ui_charmap.place(CHAR_EDGE_RIGHT_INTERSECT, (RIGHT_PANEL_EDGE, TOP_PANEL_EDGE),(COLOR_BLACK, COLOR_WHITE, 0));
+	data.ui_charmap.place(CHAR_EDGE_LEFT_INTERSECT , (0, TOP_PANEL_EDGE),(COLOR_BLACK, COLOR_BRIGHT_RED, COLOR_WHITE));
 	
 }
 
 pub fn place_colors_and_chars(data: &mut ProgramData) {
 	
 	place_text("Background Color", (RIGHT_TILE_0_POS.0 + 1, RIGHT_TILE_0_POS.1), (COLOR_BLACK, COLOR_WHITE, 0), &mut data.ui_charmap);
-	place_siding(RIGHT_TILE_0_POS.0, RIGHT_TILE_0_POS.0 + 17, RIGHT_TILE_0_POS.1 + 1, RIGHT_TILE_0_POS.1 + 18, (COLOR_BLACK, COLOR_DARK_GREY, COLOR_LIGHT_GREY), &mut data.ui_charmap);
+	place_siding(RIGHT_TILE_0_POS.0, RIGHT_TILE_0_POS.0 + 17, RIGHT_TILE_0_POS.1 + 1, RIGHT_TILE_0_POS.1 + 18, (COLOR_BLACK, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY), &mut data.ui_charmap);
 	let mut i = 0;
 	for y in RIGHT_TILE_0_POS.1 + 2 .. RIGHT_TILE_0_POS.1 + 18 {
 		for x in RIGHT_TILE_0_POS.0 + 1 .. RIGHT_TILE_0_POS.0 + 17 {
@@ -87,7 +90,7 @@ pub fn place_colors_and_chars(data: &mut ProgramData) {
 	}
 	
 	place_text("Foreground Color", (RIGHT_TILE_1_POS.0 + 1, RIGHT_TILE_1_POS.1), (COLOR_BLACK, COLOR_WHITE, 0), &mut data.ui_charmap);
-	place_siding(RIGHT_TILE_1_POS.0, RIGHT_TILE_1_POS.0 + 17, RIGHT_TILE_1_POS.1 + 1, RIGHT_TILE_0_POS.1 + 18, (COLOR_BLACK, COLOR_DARK_GREY, COLOR_LIGHT_GREY), &mut data.ui_charmap);
+	place_siding(RIGHT_TILE_1_POS.0, RIGHT_TILE_1_POS.0 + 17, RIGHT_TILE_1_POS.1 + 1, RIGHT_TILE_0_POS.1 + 18, (COLOR_BLACK, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY), &mut data.ui_charmap);
 	let mut i = 0;
 	for y in RIGHT_TILE_1_POS.1 + 2 .. RIGHT_TILE_1_POS.1 + 18 {
 		for x in RIGHT_TILE_1_POS.0 + 1 .. RIGHT_TILE_1_POS.0 + 17 {
@@ -97,7 +100,7 @@ pub fn place_colors_and_chars(data: &mut ProgramData) {
 	}
 	
 	place_text("Example: ", (RIGHT_EXAMPLE_POS.0 + 3, RIGHT_EXAMPLE_POS.1 + 2), (COLOR_BLACK, COLOR_WHITE, COLOR_WHITE), &mut data.ui_charmap);
-	place_siding(RIGHT_EXAMPLE_POS.0 + 11, RIGHT_EXAMPLE_POS.0 + 15, RIGHT_EXAMPLE_POS.1, RIGHT_EXAMPLE_POS.1 + 4, (COLOR_BLACK, COLOR_DARK_GREY, COLOR_LIGHT_GREY), &mut data.ui_charmap);
+	place_siding(RIGHT_EXAMPLE_POS.0 + 11, RIGHT_EXAMPLE_POS.0 + 15, RIGHT_EXAMPLE_POS.1, RIGHT_EXAMPLE_POS.1 + 4, (COLOR_BLACK, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY), &mut data.ui_charmap);
 	if let Some(edit_charmap_data) = &data.edit_charmap_data {
 		for y in RIGHT_EXAMPLE_POS.1 + 1 .. RIGHT_EXAMPLE_POS.1 + 4 {
 			for x in RIGHT_EXAMPLE_POS.0 + 12 .. RIGHT_EXAMPLE_POS.0 + 15 {
@@ -107,7 +110,7 @@ pub fn place_colors_and_chars(data: &mut ProgramData) {
 	}
 	
 	place_text("Character", (RIGHT_TILE_2_POS.0 + 1, RIGHT_TILE_2_POS.1), (COLOR_BLACK, COLOR_WHITE, 0), &mut data.ui_charmap);
-	place_siding(RIGHT_TILE_2_POS.0, RIGHT_TILE_2_POS.0 + 17, RIGHT_TILE_2_POS.1 + 1, RIGHT_TILE_2_POS.1 + 18, (COLOR_BLACK, COLOR_DARK_GREY, COLOR_LIGHT_GREY), &mut data.ui_charmap);
+	place_siding(RIGHT_TILE_2_POS.0, RIGHT_TILE_2_POS.0 + 17, RIGHT_TILE_2_POS.1 + 1, RIGHT_TILE_2_POS.1 + 18, (COLOR_BLACK, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY), &mut data.ui_charmap);
 	let mut i = 0;
 	for y in RIGHT_TILE_2_POS.1 + 2 .. RIGHT_TILE_2_POS.1 + 18 {
 		for x in RIGHT_TILE_2_POS.0 + 1 .. RIGHT_TILE_2_POS.0 + 17 {
@@ -117,7 +120,7 @@ pub fn place_colors_and_chars(data: &mut ProgramData) {
 	}
 	
 	place_text("Detail Color", (RIGHT_TILE_3_POS.0 + 1, RIGHT_TILE_3_POS.1), (COLOR_BLACK, COLOR_WHITE, 0), &mut data.ui_charmap);
-	place_siding(RIGHT_TILE_3_POS.0, RIGHT_TILE_3_POS.0 + 17, RIGHT_TILE_3_POS.1 + 1, RIGHT_TILE_3_POS.1 + 18, (COLOR_BLACK, COLOR_DARK_GREY, COLOR_LIGHT_GREY), &mut data.ui_charmap);
+	place_siding(RIGHT_TILE_3_POS.0, RIGHT_TILE_3_POS.0 + 17, RIGHT_TILE_3_POS.1 + 1, RIGHT_TILE_3_POS.1 + 18, (COLOR_BLACK, COLOR_DARK_GRAY, COLOR_LIGHT_GRAY), &mut data.ui_charmap);
 	let mut i = 0;
 	for y in RIGHT_TILE_3_POS.1 + 2 .. RIGHT_TILE_3_POS.1 + 18 {
 		for x in RIGHT_TILE_3_POS.0 + 1 .. RIGHT_TILE_3_POS.0 + 17 {
@@ -126,12 +129,27 @@ pub fn place_colors_and_chars(data: &mut ProgramData) {
 		}
 	}
 	
-	//if let Some(edit_charmap_data) = &data.edit_charmap_data {
-	//	let selected_char = edit_charmap_data.selected_char;
-	//	let x = (selected_char & 0x0F) as u16 + RIGHT_PANEL_EDGE + 2;
-	//	let y = ((selected_char & 0xF0) as u16 >> 4) + 27;
-	//	data.ui_charmap.place(selected_char, (x, y), (COLOR_WHITE, COLOR_BRIGHT_ORANGE, COLOR_BRIGHT_MAGENTA));
-	//}
+	if let Some(edit_charmap_data) = &data.edit_charmap_data {
+		let bg_color = edit_charmap_data.selected_colors.0;
+		let x = RIGHT_TILE_0_POS.0 + (bg_color & 0x0F) as u16 + 1;
+		let y = RIGHT_TILE_0_POS.1 + ((bg_color & 0xF0) as u16 >> 4) + 2;
+		data.ui_charmap.place(CHAR_SELECTOR, (x, y), (bg_color, COLOR_BLACK, COLOR_WHITE));
+		
+		let fg_color = edit_charmap_data.selected_colors.1;
+		let x = RIGHT_TILE_1_POS.0 + (fg_color & 0x0F) as u16 + 1;
+		let y = RIGHT_TILE_1_POS.1 + ((fg_color & 0xF0) as u16 >> 4) + 2;
+		data.ui_charmap.place(CHAR_SELECTOR, (x, y), (fg_color, COLOR_BLACK, COLOR_WHITE));
+		
+		let selected_char = edit_charmap_data.selected_char;
+		let x = RIGHT_TILE_2_POS.0 + (selected_char & 0x0F) as u16 + 1;
+		let y = RIGHT_TILE_2_POS.1 + ((selected_char & 0xF0) as u16 >> 4) + 2;
+		data.ui_charmap.place(selected_char, (x, y), (COLOR_BRIGHT_RED, COLOR_BRIGHT_GREEN, COLOR_BRIGHT_BLUE));
+		
+		let dt_color = edit_charmap_data.selected_colors.2;
+		let x = RIGHT_TILE_3_POS.0 + (dt_color & 0x0F) as u16 + 1;
+		let y = RIGHT_TILE_3_POS.1 + ((dt_color & 0xF0) as u16 >> 4) + 2;
+		data.ui_charmap.place(CHAR_SELECTOR, (x, y), (dt_color, COLOR_BLACK, COLOR_WHITE));
+	}
 	
 }
 
@@ -146,14 +164,14 @@ pub fn fill_work_area_with_transparency(data: &mut ProgramData) {
 pub fn draw_cursor(data: &mut ProgramData) {
 	let Some(edit_charmap_data) = &data.edit_charmap_data else { return; };
 	let cursor_screen_pos = (
-		edit_charmap_data.cursor_pos.0 - edit_charmap_data.view_offset.0 + 3,
-		edit_charmap_data.cursor_pos.1 - edit_charmap_data.view_offset.1 + 7,
+		edit_charmap_data.cursor_pos.0 - edit_charmap_data.view_offset.0 + WORK_AREA_LEFT_EDGE + 1,
+		edit_charmap_data.cursor_pos.1 - edit_charmap_data.view_offset.1 + WORK_AREA_TOP_EDGE + 1,
 	);
-	data.ui_charmap.place(CHAR_SELECTOR, cursor_screen_pos, (COLOR_TRANSPARENT, COLOR_WHITE, COLOR_WHITE));
-	data.ui_charmap.place(CHAR_EDGE_FULL_INTERSECT, (cursor_screen_pos.0, WORK_AREA_TOP_EDGE), (COLOR_BLACK, COLOR_WHITE, 0));
-	data.ui_charmap.place(CHAR_EDGE_FULL_INTERSECT, (cursor_screen_pos.0, WORK_AREA_BOTTOM_EDGE), (COLOR_BLACK, COLOR_WHITE, 0));
-	data.ui_charmap.place(CHAR_EDGE_FULL_INTERSECT, (WORK_AREA_LEFT_EDGE, cursor_screen_pos.1), (COLOR_BLACK, COLOR_WHITE, 0));
-	data.ui_charmap.place(CHAR_EDGE_FULL_INTERSECT, (WORK_AREA_RIGHT_EDGE, cursor_screen_pos.1), (COLOR_BLACK, COLOR_WHITE, 0));
+	data.ui_charmap.place(CHAR_SELECTOR, cursor_screen_pos, (COLOR_TRANSPARENT, COLOR_BLACK, COLOR_WHITE));
+	data.ui_charmap.place(CHAR_EDGE_FULL_INTERSECT, (cursor_screen_pos.0, WORK_AREA_TOP_EDGE), (COLOR_BLACK, COLOR_WHITE, COLOR_WHITE));
+	data.ui_charmap.place(CHAR_EDGE_FULL_INTERSECT, (cursor_screen_pos.0, WORK_AREA_BOTTOM_EDGE), (COLOR_BLACK, COLOR_WHITE, COLOR_WHITE));
+	data.ui_charmap.place(CHAR_EDGE_FULL_INTERSECT, (WORK_AREA_LEFT_EDGE, cursor_screen_pos.1), (COLOR_BLACK, COLOR_WHITE, COLOR_WHITE));
+	data.ui_charmap.place(CHAR_EDGE_FULL_INTERSECT, (WORK_AREA_RIGHT_EDGE, cursor_screen_pos.1), (COLOR_BLACK, COLOR_WHITE, COLOR_WHITE));
 }
 
 
@@ -161,36 +179,38 @@ pub fn draw_cursor(data: &mut ProgramData) {
 pub fn show_help_screen(data: &mut ProgramData) {
 	
 	let mut pos = (WORK_AREA_LEFT_EDGE + 1, WORK_AREA_TOP_EDGE + 1);
-	pos.0 += place_bordered_text("Open: ctrl+O", pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
-	pos.0 += place_bordered_text("New: ctrl+N" , pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
-	         place_bordered_text("Save: ctrl+S", pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
+	pos.0 += place_bordered_text("Open: ctrl+O", pos, (COLOR_DARK_GRAY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
+	pos.0 += place_bordered_text("New: ctrl+N" , pos, (COLOR_DARK_GRAY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
+	         place_bordered_text("Save: ctrl+S", pos, (COLOR_DARK_GRAY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
 	
 	let mut pos = (WORK_AREA_LEFT_EDGE + 1, WORK_AREA_TOP_EDGE + 4);
-	pos.0 += place_bordered_text("Close charmap: ctrl+w", pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
-	         place_bordered_text("Close charmap without saving: shift+ctrl+w", pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
+	pos.0 += place_bordered_text("Close charmap: ctrl+w", pos, (COLOR_DARK_GRAY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
+	         place_bordered_text("Close charmap without saving: shift+ctrl+w", pos, (COLOR_DARK_GRAY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
 	
 	let mut pos = (WORK_AREA_LEFT_EDGE + 1, WORK_AREA_TOP_EDGE + 7);
-	pos.0 += place_bordered_text("quit program: ctrl+q"  , pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
-	pos.0 += place_bordered_text("quit program without saving: shift+ctrl+q"  , pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
-	         place_bordered_text("toggle fullscreen: f11", pos, (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
+	pos.0 += place_bordered_text("quit program: ctrl+q"  , pos, (COLOR_DARK_GRAY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
+	         place_bordered_text("quit program without saving: shift+ctrl+q"  , pos, (COLOR_DARK_GRAY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
+	
+	let pos = (WORK_AREA_LEFT_EDGE + 1, WORK_AREA_TOP_EDGE + 10);
+	         place_bordered_text("toggle fullscreen: f11", pos, (COLOR_DARK_GRAY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
 	
 }
 
 pub fn show_new_charmap_screen(data: &mut ProgramData) {
 	let Some(new_charmap_data) = &data.new_charmap_data else { panic!("Cannot call show_new_charmap_screen() when new_charmap_data is empty"); };
 	
-	place_bordered_text("Input size of new charmap:", (WORK_AREA_LEFT_EDGE + 1, WORK_AREA_TOP_EDGE + 1), (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
+	place_bordered_text("Input size of new charmap:", (WORK_AREA_LEFT_EDGE + 1, WORK_AREA_TOP_EDGE + 1), (COLOR_DARK_GRAY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
 	
-	let color = if new_charmap_data.selection == NewCharmapSelection::WidthInput { (COLOR_WHITE, COLOR_BLACK, 0) } else { (COLOR_DARK_GREY, COLOR_WHITE, 0) };
+	let color = if new_charmap_data.selection == NewCharmapSelection::WidthInput { (COLOR_WHITE, COLOR_BLACK, 0) } else { (COLOR_DARK_GRAY, COLOR_WHITE, 0) };
 	place_bordered_text(format!("Width: {}", new_charmap_data.width_input) , (WORK_AREA_LEFT_EDGE + 1, WORK_AREA_TOP_EDGE + 4), color, COLOR_TRANSPARENT, &mut data.ui_charmap);
 	
-	let color = if new_charmap_data.selection == NewCharmapSelection::HeightInput { (COLOR_WHITE, COLOR_BLACK, 0) } else { (COLOR_DARK_GREY, COLOR_WHITE, 0) };
+	let color = if new_charmap_data.selection == NewCharmapSelection::HeightInput { (COLOR_WHITE, COLOR_BLACK, 0) } else { (COLOR_DARK_GRAY, COLOR_WHITE, 0) };
 	place_bordered_text(format!("Height: {}", new_charmap_data.height_input), (WORK_AREA_LEFT_EDGE + 1, WORK_AREA_TOP_EDGE + 7), color, COLOR_TRANSPARENT, &mut data.ui_charmap);
 	
-	let color = if new_charmap_data.selection == NewCharmapSelection::CreateButton { (COLOR_WHITE, COLOR_BLACK, 0) } else { (COLOR_DARK_GREY, COLOR_WHITE, 0) };
+	let color = if new_charmap_data.selection == NewCharmapSelection::CreateButton { (COLOR_WHITE, COLOR_BLACK, 0) } else { (COLOR_DARK_GRAY, COLOR_WHITE, 0) };
 	place_bordered_text(format!("Create Charmap"), (WORK_AREA_LEFT_EDGE + 1, WORK_AREA_TOP_EDGE + 10), color, COLOR_TRANSPARENT, &mut data.ui_charmap);
 	
-	let color = if new_charmap_data.selection == NewCharmapSelection::CancelButton { (COLOR_WHITE, COLOR_BLACK, 0) } else { (COLOR_DARK_GREY, COLOR_WHITE, 0) };
+	let color = if new_charmap_data.selection == NewCharmapSelection::CancelButton { (COLOR_WHITE, COLOR_BLACK, 0) } else { (COLOR_DARK_GRAY, COLOR_WHITE, 0) };
 	place_bordered_text(format!("Cancel"), (WORK_AREA_LEFT_EDGE + 1, WORK_AREA_TOP_EDGE + 13), color, COLOR_TRANSPARENT, &mut data.ui_charmap);
 	
 }
@@ -198,8 +218,8 @@ pub fn show_new_charmap_screen(data: &mut ProgramData) {
 pub fn show_set_save_path_screen(data: &mut ProgramData) {
 	let Some(set_save_path_data) = &data.set_save_path_data else { panic!("Cannot call show_set_save_path_screen() when set_save_path_data is empty"); };
 	
-	place_bordered_text("Enter name of file to save as:", (WORK_AREA_LEFT_EDGE + 1, WORK_AREA_TOP_EDGE + 1), (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
-	place_bordered_text(&set_save_path_data.curr_path   , (WORK_AREA_LEFT_EDGE + 1, WORK_AREA_TOP_EDGE + 4), (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
-	place_bordered_text("Press enter or esc when ready" , (WORK_AREA_LEFT_EDGE + 1, WORK_AREA_TOP_EDGE + 7), (COLOR_DARK_GREY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
+	place_bordered_text("Enter name of file to save as:", (WORK_AREA_LEFT_EDGE + 1, WORK_AREA_TOP_EDGE + 1), (COLOR_DARK_GRAY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
+	place_bordered_text(&set_save_path_data.curr_path   , (WORK_AREA_LEFT_EDGE + 1, WORK_AREA_TOP_EDGE + 4), (COLOR_DARK_GRAY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
+	place_bordered_text("Press enter or esc when ready" , (WORK_AREA_LEFT_EDGE + 1, WORK_AREA_TOP_EDGE + 7), (COLOR_DARK_GRAY, COLOR_WHITE, 0), COLOR_TRANSPARENT, &mut data.ui_charmap);
 	
 }

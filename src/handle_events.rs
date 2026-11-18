@@ -1,14 +1,14 @@
 use crate::*;
 use std::{ffi::OsStr, fs};
-use sdl3::{EventPump, keyboard, video::FullscreenType};
+use sdl3::{EventPump, keyboard::{self, Scancode}, video::FullscreenType};
 
 
 
 pub fn handle_events(event_pump: &mut EventPump, window: &mut Window, window_surface: &mut simple_gpu::WindowSurface, data: &mut ProgramData) {
 	
 	let keyboard = event_pump.keyboard_state();
-	let shift_down = keyboard.is_scancode_pressed(keyboard::Scancode::LShift) || keyboard.is_scancode_pressed(keyboard::Scancode::RShift);
-	let ctrl_down = keyboard.is_scancode_pressed(keyboard::Scancode::LCtrl) || keyboard.is_scancode_pressed(keyboard::Scancode::RCtrl);
+	// safety: the KeyboardState's lifetime is actually useless
+	let keyboard = unsafe { &*(&keyboard as *const _ as *const KeyboardState<'static>) };
 	data.show_help = keyboard.is_scancode_pressed(keyboard::Scancode::H);
 	
 	for event in event_pump.poll_iter() {
@@ -42,7 +42,7 @@ pub fn handle_events(event_pump: &mut EventPump, window: &mut Window, window_sur
 			}
 			
 			Event::KeyDown { keycode: Some(keycode), .. } => {
-				let result = handle_key_down(keycode, ctrl_down, shift_down, data, window);
+				let result = handle_key_down(keycode, &keyboard, data, window);
 				if let Err(err) = result {
 					eprintln!("Error while handling event {event:?}: \n{err}");
 				}
@@ -59,7 +59,10 @@ pub fn handle_events(event_pump: &mut EventPump, window: &mut Window, window_sur
 
 
 
-pub fn handle_key_down(keycode: Keycode, ctrl_down: bool, shift_down: bool, data: &mut ProgramData, window: &mut Window) -> Result<()>{
+pub fn handle_key_down(keycode: Keycode, keyboard: &KeyboardState, data: &mut ProgramData, window: &mut Window) -> Result<()>{
+	
+	let shift_down = keyboard.is_scancode_pressed(keyboard::Scancode::LShift) || keyboard.is_scancode_pressed(keyboard::Scancode::RShift);
+	let ctrl_down = keyboard.is_scancode_pressed(keyboard::Scancode::LCtrl) || keyboard.is_scancode_pressed(keyboard::Scancode::RCtrl);
 	
 	if keycode == Keycode::F11 {
 		let fullscreen = window.fullscreen_state() == FullscreenType::True;
@@ -157,10 +160,63 @@ pub fn handle_key_down(keycode: Keycode, ctrl_down: bool, shift_down: bool, data
 		}
 		
 		CurrentPrioritizedAction::ShowingHelpScreen => {}
-		CurrentPrioritizedAction::Nothing => {}
+		
+		CurrentPrioritizedAction::Nothing => {
+			if let Some(edit_charmap_data) = &mut data.edit_charmap_data {
+				
+				if keyboard.is_scancode_pressed(Scancode::_1) {
+					apply_channel_arrow_keys(&mut edit_charmap_data.selected_colors.0, keycode, ctrl_down);
+				} else if keyboard.is_scancode_pressed(Scancode::_2) {
+					apply_channel_arrow_keys(&mut edit_charmap_data.selected_colors.1, keycode, ctrl_down);
+				} else if keyboard.is_scancode_pressed(Scancode::_3) {
+					apply_channel_arrow_keys(&mut edit_charmap_data.selected_char, keycode, ctrl_down);
+				} else if keyboard.is_scancode_pressed(Scancode::_4) {
+					apply_channel_arrow_keys(&mut edit_charmap_data.selected_colors.2, keycode, ctrl_down);
+				} else {
+					apply_cursor_arrow_keys(&mut edit_charmap_data.cursor_pos, edit_charmap_data.charmap.size, keycode, ctrl_down);
+				}
+				
+			}
+		}
 	}
 	
 	Ok(())
+}
+
+
+
+pub fn apply_cursor_arrow_keys(pos: &mut (u16, u16), maximums: (u16, u16), keycode: Keycode, ctrl_down: bool) {
+	let move_amount = if ctrl_down { 8 } else { 1 };
+	if keycode == Keycode::Left {
+		pos.0 = pos.0.max(move_amount) - move_amount;
+	}
+	if keycode == Keycode::Right {
+		pos.0 = pos.0.min(maximums.0 - 1 - move_amount) + move_amount;
+	}
+	if keycode == Keycode::Up {
+		pos.1 = pos.1.max(move_amount) - move_amount;
+	}
+	if keycode == Keycode::Down {
+		pos.1 = pos.1.min(maximums.1 - 1 - move_amount) + move_amount;
+	}
+}
+
+pub fn apply_channel_arrow_keys(value: &mut u8, keycode: Keycode, ctrl_down: bool) {
+	let (mut x, mut y) = (*value & 0x0F, (*value & 0xF0) >> 4);
+	let move_amount = if ctrl_down { 4 } else { 1 };
+	if keycode == Keycode::Left {
+		x = x.max(move_amount) - move_amount;
+	}
+	if keycode == Keycode::Right {
+		x = x.min(15 - move_amount) + move_amount;
+	}
+	if keycode == Keycode::Up {
+		y = y.max(move_amount) - move_amount;
+	}
+	if keycode == Keycode::Down {
+		y = y.min(15 - move_amount) + move_amount;
+	}
+	*value = x as u8 + (y << 4) as u8;
 }
 
 

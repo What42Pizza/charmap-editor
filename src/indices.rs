@@ -28,9 +28,9 @@ pub const CHAR_SELECTOR_BOTTOM_RIGHT: u8 = 22;
 
 pub const COLOR_TRANSPARENT: u8 = 0;
 pub const COLOR_BLACK      : u8 = 1;
-pub const COLOR_DARK_GREY  : u8 = 2;
-pub const COLOR_GREY       : u8 = 3;
-pub const COLOR_LIGHT_GREY : u8 = 4;
+pub const COLOR_DARK_GRAY  : u8 = 2;
+pub const COLOR_GRAY       : u8 = 3;
+pub const COLOR_LIGHT_GRAY : u8 = 4;
 pub const COLOR_WHITE      : u8 = 5;
 
 pub const COLOR_BRIGHT_RED    : u8 = 6;
