@@ -23,6 +23,7 @@ layout(set = 0, binding = 0) uniform all_uniforms {
 	float scalingFactor;
 	float scanlineAmount;
 	float scanlineScale;
+	float bloomAmount;
 	
 };
 layout(set = 1, binding = 0) uniform texture2D intermediate_tex;
@@ -62,6 +63,22 @@ vec3 textureCatmullRom(vec2 position) {
 	return color.rgb / color.a;
 }
 
+float invMix(float v, float a, float b) {
+	return (v - a) / (b - a);
+}
+
+
+
+vec3 getBloomLevel(vec2 texelCoord, int mip_level) {
+	vec2 texcoord = texelCoord / SCREEN_SIZE;
+	vec3 total = vec3(0.0);
+	total += texture(intermediate, texcoord + 1.0 / vec2(      SCREEN_SIZE.x,       SCREEN_SIZE.y), mip_level).rgb;
+	total += texture(intermediate, texcoord + 1.0 / vec2(0.0 - SCREEN_SIZE.x,       SCREEN_SIZE.y), mip_level).rgb;
+	total += texture(intermediate, texcoord + 1.0 / vec2(      SCREEN_SIZE.x, 0.0 - SCREEN_SIZE.y), mip_level).rgb;
+	total += texture(intermediate, texcoord + 1.0 / vec2(0.0 - SCREEN_SIZE.x, 0.0 - SCREEN_SIZE.y), mip_level).rgb;
+	return total * 0.25;
+}
+
 
 
 void main() {
@@ -71,17 +88,27 @@ void main() {
 	texelCoord *= scalingFactor;
 	texelCoord += floor(SCREEN_SIZE * 0.5);
 	
-	vec3 color;
-	if (texelCoord.x > 0.0 && texelCoord.x < SCREEN_SIZE.x && texelCoord.y > 0.0 && texelCoord.y < SCREEN_SIZE.y) {
-		color = textureCatmullRom(texelCoord);
-		color *= sin(texelCoord.y * scanlineScale) * (0.5 * scanlineAmount) + (1.0 - 0.5 * scanlineAmount);
-	} else {
-		float backgroundRed = ((backgroundColorU32 & 0x0000FF) >> 0) / 255.0;
-		float backgroundGreen = ((backgroundColorU32 & 0x00FF00) >> 8) / 255.0;
-		float backgroundBlue = ((backgroundColorU32 & 0xFF0000) >> 16) / 255.0;
-		color = vec3(backgroundRed, backgroundGreen, backgroundBlue);
-		color = pow(color, vec3(2.2));
-	}
+	vec3 color = textureCatmullRom(texelCoord);
+	color *= sin(texelCoord.y * scanlineScale) * (0.5 * scanlineAmount) + (1.0 - 0.5 * scanlineAmount);
+	
+	color += getBloomLevel(texelCoord, 1) * bloomAmount * (1.0 / 4.0);
+	color += getBloomLevel(texelCoord, 2) * bloomAmount * (1.0 / 8.0);
+	color += getBloomLevel(texelCoord, 3) * bloomAmount * (1.0 / 16.0);
+	color += getBloomLevel(texelCoord, 4) * bloomAmount * (1.0 / 32.0);
+	
+	float backgroundRed = ((backgroundColorU32 & 0x0000FF) >> 0) / 255.0;
+	float backgroundGreen = ((backgroundColorU32 & 0x00FF00) >> 8) / 255.0;
+	float backgroundBlue = ((backgroundColorU32 & 0xFF0000) >> 16) / 255.0;
+	vec3 backgroundColor = vec3(backgroundRed, backgroundGreen, backgroundBlue);
+	backgroundColor = pow(backgroundColor, vec3(2.2));
+	
+	float backgroundAmount = 0.0;
+	backgroundAmount += clamp(invMix(texelCoord.x, 0.0, -1.0), 0.0, 1.0);
+	backgroundAmount += clamp(invMix(texelCoord.x, SCREEN_SIZE.x - 1, SCREEN_SIZE.x), 0.0, 1.0);
+	backgroundAmount += clamp(invMix(texelCoord.y, 0.0, -1.0), 0.0, 1.0);
+	backgroundAmount += clamp(invMix(texelCoord.y, SCREEN_SIZE.y - 1, SCREEN_SIZE.y), 0.0, 1.0);
+	backgroundAmount = min(backgroundAmount, 1.0);
+	color = mix(color, backgroundColor, backgroundAmount);
 	
 	frag_color = vec4(color, 1.0);
 }

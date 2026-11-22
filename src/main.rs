@@ -206,7 +206,14 @@ fn main_result() -> Result<()> {
 	// textures
 	let char_atlas_tex = load_character_atlas(&assets_path, &gpu_instance).context("Failed to load character atlas texture")?;
 	let colors_lut_tex = load_colors_lut(&assets_path, &gpu_instance).context("Failed to load colors LUT texture")?;
-	let intermediate_tex = simple_gpu::create_texture("Intermediate Render Texture", (SCREEN_WIDTH as u32, SCREEN_HEIGHT as u32), wgpu::TextureFormat::Rgba8Unorm, wgpu::FilterMode::Linear, 1, &gpu_instance);
+	let mut intermediate_tex = simple_gpu::create_texture("Intermediate Render Texture", (SCREEN_WIDTH as u32, SCREEN_HEIGHT as u32), wgpu::TextureFormat::Rgba8Unorm, wgpu::FilterMode::Linear, 5, &gpu_instance);
+	let intermediate_mipmap_shaders = simple_gpu::load_glsl_shaders(
+		assets_path.join("shaders/intermediate_mipmap.vsh"),
+		assets_path.join("shaders/intermediate_mipmap.fsh"),
+		&gpu_instance,
+		&[]
+	)?;
+	intermediate_tex.wgpu_mipmap_shaders = intermediate_mipmap_shaders;
 	
 	// final render pass
 	let final_shaders = simple_gpu::load_glsl_shaders(
@@ -246,6 +253,7 @@ fn main_result() -> Result<()> {
 			background_color: (20, 20, 30),
 			scanline_amount: 0.4,
 			scanline_scale: 4.0,
+			bloom_amount: 0.2,
 		},
 		
 		char_atlas_tex,

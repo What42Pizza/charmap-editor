@@ -14,8 +14,9 @@ pub struct RawFinalUniforms {
 	pub scaling_factor: f32,
 	pub scanline_amount: f32,
 	pub scanline_scale: f32,
+	pub bloom_amount: f32,
 	
-	pub padding: [u8; 4],
+	//pub padding: [u8; 4],
 }
 
 pub fn update_uniforms(data: &mut ProgramData, window_size: (u32, u32)) {
@@ -56,6 +57,11 @@ pub fn update_uniforms(data: &mut ProgramData, window_size: (u32, u32)) {
 		needs_upload = true;
 	}
 	
+	if uniforms.bloom_amount != data.rendering_settings.bloom_amount {
+		uniforms.bloom_amount = data.rendering_settings.bloom_amount;
+		needs_upload = true;
+	}
+	
 	if needs_upload {
 		simple_gpu::sync_uniforms_buffer(&data.final_uniforms, &data.gpu_instance);
 	}
@@ -69,6 +75,7 @@ pub struct RenderingSettings {
 	pub scaling_factor: f32,
 	pub scanline_amount: f32,
 	pub scanline_scale: f32,
+	pub bloom_amount: f32,
 	
 }
 
@@ -99,7 +106,7 @@ pub fn render(data: &mut ProgramData, window: &Window, window_surface: &mut simp
 	let mut charmap_render_pass = command_encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
 		label: Some("Charmap Render Pass"),
 		color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-			view: &data.intermediate_tex.wgpu_view,
+			view: &data.intermediate_tex.wgpu_mipmap_views[0],
 			depth_slice: None,
 			resolve_target: None,
 			ops: wgpu::Operations {
@@ -129,6 +136,7 @@ pub fn render(data: &mut ProgramData, window: &Window, window_surface: &mut simp
 		);
 	}
 	simple_gpu::finish_render_pass(charmap_render_pass);
+	simple_gpu::regenerate_mipmaps(&data.intermediate_tex, &mut command_encoder, &mut data.gpu_instance);
 	
 	// render intermediate tex to screen
 	let mut final_render_pass = simple_gpu::start_2d_render_pass(

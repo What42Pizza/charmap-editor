@@ -1,13 +1,16 @@
 {
 	"cSpell.words": [
 		"bytemuck",
+		"Catmull",
 		"charmap",
 		"gles",
 		"glsl",
 		"multiview",
 		"scancode",
 		"scanline",
+		"texel",
 		"Unorm",
+		"uvec",
 		"Vsync",
 		"webp",
 		"wgpu",
